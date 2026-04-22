@@ -25,9 +25,9 @@ export const Header = () => {
       }`}
     >
       <Link to="/" className="flex items-center gap-3 group">
-        <span className="w-2 h-2 bg-primary rounded-full group-hover:shadow-crimson transition-soft" />
-        <span className="font-display text-xl tracking-tight">TENDER</span>
-        <span className="hidden md:inline text-[10px] uppercase tracking-[0.35em] text-muted-foreground border-l border-border pl-3 ml-1">
+        <span className="w-2 h-2 bg-primary rounded-full group-hover:shadow-amber transition-soft" />
+        <span className="font-display text-2xl tracking-tight italic text-accent">Tender</span>
+        <span className="hidden md:inline text-[10px] uppercase tracking-[0.35em] text-muted-foreground border-l border-border pl-3 ml-1 font-sans-ui">
           Vol. I
         </span>
       </Link>
