@@ -1,55 +1,164 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/Header";
 import { HeartButton } from "@/components/HeartButton";
-import { Sparkles, Users, BookHeart } from "lucide-react";
+import { HeroSphere } from "@/components/HeroSphere";
 
-const features = [
-  { icon: Sparkles, title: "Choose your universe", desc: "Pick a trope that sets the mood — from forbidden bonds to royal romance." },
-  { icon: Users, title: "Build your characters", desc: "Bring in anyone you love. Add yourself if you dare." },
-  { icon: BookHeart, title: "Live your story", desc: "An immersive scene written just for you, in seconds." },
+const chapters = [
+  { num: "01", title: "Choose the universe", desc: "Forbidden bonds. Royal courts. Fractured academies. The world bends to your fiction." },
+  { num: "02", title: "Cast the obsession", desc: "Anyone — real, imagined, half-remembered. The figure at the center of your dark." },
+  { num: "03", title: "Live the chapter", desc: "An immersive scene, written for you in seconds. Read it once. Keep it forever." },
 ];
 
 const Index = () => {
   const navigate = useNavigate();
+  const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+    <div className="min-h-screen bg-background grain relative">
       <Header />
-      <div className="bokeh absolute inset-0 pointer-events-none" />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-36 pb-24 text-center">
-        <p className="text-sm uppercase tracking-[0.4em] text-primary/70 animate-fade-in">A private creative space</p>
-        <h1 className="font-serif text-7xl md:text-9xl mt-6 text-foreground animate-fade-up">
-          Tender
-        </h1>
-        <p className="font-serif italic text-2xl md:text-3xl text-primary mt-6 animate-fade-up delay-100">
-          Your imagination, written.
-        </p>
-        <p className="max-w-xl mx-auto mt-6 text-muted-foreground text-lg animate-fade-up delay-200">
-          Create your own immersive story with the characters you love — in seconds.
-        </p>
-
-        <div className="mt-12 animate-fade-up delay-300">
-          <HeartButton glow onClick={() => navigate("/create")}>
-            Start your story
-          </HeartButton>
+      {/* HERO */}
+      <section ref={heroRef} className="relative h-screen w-full overflow-hidden bg-gradient-noir">
+        {/* 3D Sphere — fills hero */}
+        <div
+          className="absolute inset-0"
+          style={{
+            transform: `translateY(${scrollY * 0.4}px) scale(${1 + scrollY * 0.0005})`,
+            opacity: Math.max(0, 1 - scrollY / 700),
+          }}
+        >
+          <HeroSphere />
         </div>
 
-        <section className="grid md:grid-cols-3 gap-6 mt-32">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              className="group p-8 rounded-3xl bg-card/70 backdrop-blur-sm border border-border/50 shadow-card hover:shadow-soft transition-spring hover:-translate-y-1 animate-fade-up"
-              style={{ animationDelay: `${0.4 + i * 0.1}s` }}
-            >
-              <div className="w-12 h-12 rounded-full bg-gradient-rose flex items-center justify-center mx-auto mb-5 group-hover:animate-heartbeat">
-                <f.icon className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <h3 className="font-serif text-xl mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+        {/* Crimson glow vignette */}
+        <div className="absolute inset-0 bg-gradient-ember pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none" />
+
+        {/* Editorial side label */}
+        <div
+          className="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 vertical-text text-[10px] uppercase tracking-[0.5em] text-muted-foreground z-10"
+          style={{ transform: `translateY(calc(-50% + ${scrollY * -0.15}px))` }}
+        >
+          A Dark Romance Editorial — MMXXVI
+        </div>
+        <div
+          className="hidden md:block absolute right-8 top-1/2 -translate-y-1/2 vertical-text text-[10px] uppercase tracking-[0.5em] text-muted-foreground z-10"
+          style={{ transform: `translateY(calc(-50% + ${scrollY * -0.1}px)) rotate(180deg)` }}
+        >
+          Issue No. 001 — Crimson
+        </div>
+
+        {/* Hero copy */}
+        <div
+          className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center"
+          style={{ transform: `translateY(${scrollY * -0.25}px)`, opacity: Math.max(0, 1 - scrollY / 500) }}
+        >
+          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.6em] text-primary/80 animate-fade-in">
+            — An Editorial of the Imagined —
+          </p>
+          <h1 className="font-display text-[22vw] md:text-[14vw] leading-[0.85] mt-6 text-foreground animate-fade-up">
+            TENDER
+          </h1>
+          <p className="font-serif italic text-xl md:text-3xl text-primary mt-8 animate-fade-up delay-100 max-w-2xl text-balance">
+            Your imagination, written in crimson.
+          </p>
+          <p className="max-w-md mx-auto mt-6 text-muted-foreground text-sm md:text-base font-light tracking-wide animate-fade-up delay-200">
+            Compose immersive fiction with the figures that haunt you. In seconds.
+          </p>
+
+          <div className="mt-14 animate-fade-up delay-300">
+            <HeartButton glow onClick={() => navigate("/create")}>
+              Begin Chapter One
+            </HeartButton>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-fade-in delay-700">
+          <span className="text-[9px] uppercase tracking-[0.4em] text-muted-foreground">Scroll</span>
+          <div className="w-px h-12 bg-gradient-to-b from-primary to-transparent" />
+        </div>
+      </section>
+
+      {/* MARQUEE */}
+      <section className="relative py-8 border-y border-border/50 overflow-hidden bg-background">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex items-center gap-12 px-6 font-display text-3xl md:text-5xl text-foreground/30">
+              {["FORBIDDEN", "OBSESSION", "RUIN", "DEVOTION", "VOWS", "VENGEANCE", "DESIRE", "SHADOW"].map((w) => (
+                <span key={w + i} className="flex items-center gap-12">
+                  <span>{w}</span>
+                  <span className="text-primary text-xl">✦</span>
+                </span>
+              ))}
             </div>
           ))}
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* CHAPTERS */}
+      <section className="relative py-32 md:py-48 px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-24">
+          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— The Method —</p>
+          <h2 className="font-display text-5xl md:text-7xl text-balance">
+            Three movements.<br/>
+            <span className="italic font-normal text-muted-foreground">One private fiction.</span>
+          </h2>
+        </div>
+
+        <div className="space-y-px">
+          {chapters.map((c, i) => (
+            <div
+              key={c.num}
+              className="group grid md:grid-cols-12 gap-6 md:gap-12 py-12 md:py-16 border-t border-border hover:border-primary transition-soft"
+            >
+              <div className="md:col-span-2 font-display text-6xl md:text-7xl text-primary/40 group-hover:text-primary transition-soft">
+                {c.num}
+              </div>
+              <div className="md:col-span-4">
+                <h3 className="font-display text-3xl md:text-4xl">{c.title}</h3>
+              </div>
+              <div className="md:col-span-6 flex items-center">
+                <p className="text-muted-foreground text-base md:text-lg font-light leading-relaxed text-balance">
+                  {c.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div className="border-t border-border" />
+        </div>
+      </section>
+
+      {/* CLOSING CTA */}
+      <section className="relative py-32 md:py-48 px-6 text-center bg-gradient-noir border-t border-border">
+        <div className="absolute inset-0 bg-gradient-ember opacity-50" />
+        <div className="relative max-w-3xl mx-auto">
+          <h2 className="font-display text-5xl md:text-7xl text-balance leading-[0.95]">
+            Your darkest chapter <span className="italic text-primary">awaits</span>.
+          </h2>
+          <p className="text-muted-foreground mt-8 max-w-lg mx-auto font-light">
+            Step inside. Write what you cannot say aloud.
+          </p>
+          <div className="mt-12">
+            <HeartButton glow onClick={() => navigate("/create")}>
+              Enter Tender
+            </HeartButton>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-border py-10 px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+        <span>© MMXXVI — Tender Editorial</span>
+        <span>Crimson Issue · Vol. I</span>
+      </footer>
     </div>
   );
 };
