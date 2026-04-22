@@ -17,8 +17,23 @@ const TEMPLATE_LABELS: Record<string, string> = {
 
 interface Story { id:string; title:string; template:string; created_at:string; cover_url:string|null; user_id:string; }
 
+const T: Record<string, Record<string, string>> = {
+  en: { bookshelf:tr("bookshelf"), sub:tr("sub"), new_story:tr("new_story"), empty:tr("empty"), write_first:tr("write_first"), add_cover:tr("add_cover"), change_cover:tr("change_cover"), rewrite:tr("rewrite") },
+  fr: { bookshelf:"Bibliothèque", sub:"Toutes vos histoires, toujours proches.", new_story:"Écrire une nouvelle histoire", empty:"Votre bibliothèque est vide.", write_first:"Écrire la première", add_cover:"Ajouter couverture", change_cover:"Changer couverture", rewrite:"Réécrire" },
+  es: { bookshelf:"Biblioteca", sub:"Cada historia que has escrito, siempre cerca.", new_story:"Escribir una nueva historia", empty:"Tu biblioteca está vacía.", write_first:"Escribir la primera", add_cover:"Añadir portada", change_cover:"Cambiar portada", rewrite:"Reescribir" },
+  pt: { bookshelf:"Biblioteca", sub:"Cada história que você escreveu, sempre perto.", new_story:"Escrever uma nova história", empty:"Sua biblioteca está vazia.", write_first:"Escrever a primeira", add_cover:"Adicionar capa", change_cover:"Trocar capa", rewrite:"Reescrever" },
+  ko: { bookshelf:"서재", sub:"당신이 쓴 모든 이야기.", new_story:"새 이야기 쓰기", empty:"서재가 비어 있습니다.", write_first:"첫 번째 이야기 쓰기", add_cover:"표지 추가", change_cover:"표지 변경", rewrite:"다시 쓰기" },
+  ja: { bookshelf:"書架", sub:"書いたすべての物語。", new_story:"新しい物語を書く", empty:"書架は空です。", write_first:"最初の物語を書く", add_cover:"表紙を追加", change_cover:"表紙を変更", rewrite:"書き直す" },
+  ar: { bookshelf:"رف الكتب", sub:"كل قصة كتبتها.", new_story:"اكتب قصة جديدة", empty:"رفك فارغ.", write_first:"اكتب أولى قصصك", add_cover:"إضافة غلاف", change_cover:"تغيير الغلاف", rewrite:"أعد الكتابة" },
+  de: { bookshelf:"Regal", sub:"Jede Geschichte, immer nah.", new_story:"Neue Geschichte schreiben", empty:"Dein Regal ist leer.", write_first:"Erste Geschichte schreiben", add_cover:"Cover hinzufügen", change_cover:"Cover ändern", rewrite:"Neu schreiben" },
+  it: { bookshelf:"Libreria", sub:"Ogni storia che hai scritto.", new_story:"Scrivi una nuova storia", empty:"Il tuo scaffale è vuoto.", write_first:"Scrivi la prima", add_cover:"Aggiungi copertina", change_cover:"Cambia copertina", rewrite:"Riscrivi" },
+  zh: { bookshelf:"书架", sub:"你写过的每一个故事。", new_story:"写一个新故事", empty:"你的书架是空的。", write_first:"写第一个故事", add_cover:"添加封面", change_cover:"更换封面", rewrite:"重新创作" },
+};
+
 const Library = () => {
   const navigate = useNavigate();
+  const lang = (() => { try { return localStorage.getItem("tender_lang") || "en"; } catch { return "en"; } })();
+  const tr = (k: string) => T[lang]?.[k] ?? T.en[k] ?? k;
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string|null>(null);
@@ -140,7 +155,7 @@ const Library = () => {
                     <button onClick={() => triggerCover(s.id)} disabled={uploadingId === s.id}
                       className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft disabled:opacity-50">
                       {uploadingId === s.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
-                      {s.cover_url ? "Change cover" : "Add cover"}
+                      {s.cover_url ? tr("change_cover") : tr("add_cover")}
                     </button>
                     <button onClick={() => navigate("/create")}
                       className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft">

@@ -93,6 +93,15 @@ const Index = () => {
       </footer>
     </div>
   );
+  zh: {
+    tagline: "每一个想象都值得被书写。",
+    cta: "开始我的故事", cta2: "创作我的故事",
+    how: "如何使用", steps: "简单三步。",
+    steps_sub: "专属于你的故事。",
+    s1_title: "选择世界", s1_desc: "选择一个激励你的类型——从皇室浪漫到奇幻学院。",
+    s2_title: "带来你的角色", s2_desc: "真实的、虚构的，或介于两者之间。",
+    s3_title: "阅读你的故事", s3_desc: "几秒钟内为你写好的沉浸式场景。",
+    closing: "你的下一个故事正在", closing_bold: "等待。", closing_sub: "把你的想象力带到页面上。",
+  },
 };
-
 export default Index;

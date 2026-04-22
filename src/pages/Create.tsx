@@ -269,7 +269,20 @@ const Create = () => {
     }
   };
 
-  const stepLabels = ["Genre","World","You","Cast","Opening","Tone","Ending","Length","Language"];
+  const getLang = () => { try { return localStorage.getItem("tender_lang") || "en"; } catch { return "en"; } };
+const STEP_LABELS: Record<string, string[]> = {
+  en: ["Genre","World","You","Cast","Opening","Tone","Ending","Length","Language"],
+  fr: ["Genre","Monde","Vous","Cast","Début","Ton","Fin","Longueur","Langue"],
+  es: ["Género","Mundo","Tú","Cast","Inicio","Tono","Final","Longitud","Idioma"],
+  pt: ["Gênero","Mundo","Você","Cast","Início","Tom","Final","Duração","Idioma"],
+  ko: ["장르","세계","나","출연","시작","분위기","결말","길이","언어"],
+  ja: ["ジャンル","世界","あなた","キャスト","開幕","トーン","結末","長さ","言語"],
+  ar: ["النوع","العالم","أنت","الممثلون","البداية","النبرة","النهاية","الطول","اللغة"],
+  de: ["Genre","Welt","Du","Besetzung","Anfang","Ton","Ende","Länge","Sprache"],
+  it: ["Genere","Mondo","Tu","Cast","Inizio","Tono","Fine","Lunghezza","Lingua"],
+  zh: ["类型","世界","你","角色","开篇","基调","结局","长度","语言"],
+};
+const stepLabels = STEP_LABELS[getLang()] ?? STEP_LABELS.en;
 
   return (
     <div className="min-h-screen bg-gradient-noir relative grain">
