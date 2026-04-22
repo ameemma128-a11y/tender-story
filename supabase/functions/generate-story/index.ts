@@ -11,19 +11,18 @@ serve(async (req) => {
 
   try {
     const {
-      // new shape
       genres, storyIdea, contexts, contextNotes,
-      // legacy shape (still tolerated)
       template,
-      // common
       characterName, characterTraits, characterNotes,
-      readerName, readerTraits, readerNotes, tones, length,
+      readerName, readerTraits, readerNotes,
+      tones, toneNotes, length, language,
     } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const wordTarget = length === "short" ? 500 : length === "chapter" ? 1500 : 3000;
+    const lang = (language && String(language).trim()) || "English";
 
     const genreList: string[] = Array.isArray(genres) && genres.length
       ? genres
@@ -49,20 +48,23 @@ serve(async (req) => {
         }${readerNotes ? `. Self-description: ${readerNotes}` : ""}. Write in second person ("you").`
       : `Write in second person ("you"), the reader as the protagonist.`;
 
+    const toneBlock = `Tone: ${tones?.join(", ") || "sweet romance"}${toneNotes ? `. Exact mood requested: ${toneNotes}` : ""}.`;
+
     const system = `You are Tender, a gifted storyteller crafting deeply immersive, emotionally rich personalized stories.
 Style: cinematic, sensorial, present tense, evocative imagery, intimate inner thoughts, vivid dialogue.
 Always respect the user's chosen tone and blend ALL selected genres and world elements coherently.
-Avoid cringe; aim for elegant, literary prose. Begin with a captivating hook. End with a resonant beat.`;
+Avoid cringe; aim for elegant, literary prose. Begin with a captivating hook. End with a resonant beat.
+CRITICAL LANGUAGE RULE: Write the ENTIRE story — title and body — in ${lang}. Do not mix languages. Use natural, native-quality prose in ${lang}.`;
 
-    const user = `Write an immersive story (~${wordTarget} words).
+    const user = `Write an immersive story (~${wordTarget} words) entirely in ${lang}.
 Genre blend: ${vibe}.
 ${ideaBlock}
 ${worldBlock}
 ${charBlock}
-Tone: ${tones?.join(", ") || "sweet romance"}.
+${toneBlock}
 ${reader}
-Start with a short evocative title on the first line formatted as: # Title
-Then a blank line, then the story.`;
+Start with a short evocative title in ${lang} on the first line formatted as: # Title
+Then a blank line, then the story — all in ${lang}.`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
