@@ -24,13 +24,24 @@ const Auth = () => {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { emailRedirectTo: `${window.location.origin}/create` },
         });
         if (error) throw error;
-        toast.success("Welcome to Tender");
-        navigate("/create");
+        if (data.session) {
+          toast.success("Welcome to Tender");
+          navigate("/create");
+        } else {
+          // Fallback: try immediate sign-in (auto-confirm enabled)
+          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInErr) {
+            toast.success("Account created. You can sign in now.");
+            setMode("signin");
+          } else {
+            navigate("/create");
+          }
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
