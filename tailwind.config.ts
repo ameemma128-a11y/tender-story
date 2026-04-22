@@ -8,9 +8,9 @@ export default {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1280px" } },
     extend: {
       fontFamily: {
-        serif: ['"Bodoni Moda"', 'Didot', 'Georgia', 'serif'],
+        serif: ['"Cormorant Garamond"', '"EB Garamond"', 'Georgia', 'serif'],
         sans: ['"Inter"', 'system-ui', 'sans-serif'],
-        display: ['"Bodoni Moda"', 'Didot', 'serif'],
+        display: ['"Cormorant Garamond"', '"EB Garamond"', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
