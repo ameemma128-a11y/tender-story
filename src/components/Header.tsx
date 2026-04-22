@@ -14,6 +14,7 @@ const LANGUAGES = [
   { id: "ar", label: "AR", native: "العربية" },
   { id: "de", label: "DE", native: "Deutsch" },
   { id: "it", label: "IT", native: "Italiano" },
+  { id: "zh", label: "ZH", native: "中文" },
 ];
 
 const NAV: Record<string, Record<string, string>> = {
