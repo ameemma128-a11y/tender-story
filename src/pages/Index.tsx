@@ -3,15 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { Header } from "@/components/Header";
 import { HeartButton } from "@/components/HeartButton";
 import { HeroSphere } from "@/components/HeroSphere";
-
-const chapters = [
-  { num: "01", title: "Pick a world", desc: "Choose a genre that sparks you — from royal romance to fantasy academies. The mood is yours to set." },
-  { num: "02", title: "Bring your characters", desc: "Real, fictional, or somewhere in between. Build the cast you want to read about." },
-  { num: "03", title: "Read your story", desc: "An immersive scene, written for you in seconds. Save it, share it, keep it forever." },
-];
+import { useLang } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { tr } = useLang();
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -20,6 +16,12 @@ const Index = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const chapters = [
+    { num: "01", title: tr("s1_title"), desc: tr("s1_desc") },
+    { num: "02", title: tr("s2_title"), desc: tr("s2_desc") },
+    { num: "03", title: tr("s3_title"), desc: tr("s3_desc") },
+  ];
 
   return (
     <div className="min-h-screen bg-background grain relative">
@@ -61,12 +63,11 @@ const Index = () => {
             Tender
           </h1>
           <p className="font-serif italic text-xl md:text-2xl text-foreground/85 mt-10 animate-fade-up delay-200 max-w-2xl text-balance">
-            Every imagination deserves to be written.
+            {tr("tagline")}
           </p>
-
           <div className="mt-16 animate-fade-up delay-300">
             <HeartButton glow onClick={() => navigate("/create")}>
-              Begin your story
+              {tr("cta")}
             </HeartButton>
           </div>
         </div>
@@ -93,22 +94,19 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CHAPTERS */}
+      {/* HOW IT WORKS */}
       <section className="relative py-32 md:py-48 px-6 max-w-6xl mx-auto">
         <div className="text-center mb-24">
-          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— How it works —</p>
+          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— {tr("how")} —</p>
           <h2 className="font-display text-5xl md:text-7xl text-balance">
-            Three simple steps.<br/>
-            <span className="italic font-normal text-muted-foreground">One story made for you.</span>
+            {tr("steps")}<br />
+            <span className="italic font-normal text-muted-foreground">{tr("steps_sub")}</span>
           </h2>
         </div>
 
         <div className="space-y-px">
           {chapters.map((c) => (
-            <div
-              key={c.num}
-              className="group grid md:grid-cols-12 gap-6 md:gap-12 py-12 md:py-16 border-t border-border hover:border-primary transition-soft"
-            >
+            <div key={c.num} className="group grid md:grid-cols-12 gap-6 md:gap-12 py-12 md:py-16 border-t border-border hover:border-primary transition-soft">
               <div className="md:col-span-2 font-display text-6xl md:text-7xl text-primary/40 group-hover:text-primary transition-soft">
                 {c.num}
               </div>
@@ -116,9 +114,7 @@ const Index = () => {
                 <h3 className="font-display text-3xl md:text-4xl">{c.title}</h3>
               </div>
               <div className="md:col-span-6 flex items-center">
-                <p className="text-muted-foreground text-base md:text-lg font-light leading-relaxed text-balance">
-                  {c.desc}
-                </p>
+                <p className="text-muted-foreground text-base md:text-lg font-light leading-relaxed text-balance">{c.desc}</p>
               </div>
             </div>
           ))}
@@ -131,15 +127,11 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-aurora opacity-50" />
         <div className="relative max-w-3xl mx-auto">
           <h2 className="font-display text-5xl md:text-7xl text-balance leading-[0.95]">
-            Your next story is <span className="italic text-primary">waiting</span>.
+            {tr("closing")} <span className="italic text-primary">{tr("closing_bold")}</span>
           </h2>
-          <p className="text-muted-foreground mt-8 max-w-lg mx-auto font-light">
-            Bring your imagination to the page. It only takes a few seconds.
-          </p>
+          <p className="text-muted-foreground mt-8 max-w-lg mx-auto font-light">{tr("closing_sub")}</p>
           <div className="mt-12">
-            <HeartButton glow onClick={() => navigate("/create")}>
-              Create your story
-            </HeartButton>
+            <HeartButton glow onClick={() => navigate("/create")}>{tr("cta2")}</HeartButton>
           </div>
         </div>
       </section>
