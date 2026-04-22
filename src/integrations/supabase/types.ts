@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stories: {
+        Row: {
+          character_name: string
+          content: string
+          created_at: string
+          id: string
+          length: string
+          reader_name: string | null
+          reader_traits: string[] | null
+          template: string
+          title: string
+          tones: string[] | null
+          user_id: string
+        }
+        Insert: {
+          character_name: string
+          content: string
+          created_at?: string
+          id?: string
+          length: string
+          reader_name?: string | null
+          reader_traits?: string[] | null
+          template: string
+          title: string
+          tones?: string[] | null
+          user_id: string
+        }
+        Update: {
+          character_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          length?: string
+          reader_name?: string | null
+          reader_traits?: string[] | null
+          template?: string
+          title?: string
+          tones?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
