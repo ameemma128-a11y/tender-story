@@ -63,11 +63,11 @@ const Index = () => {
           <h1 className="font-display text-[22vw] md:text-[14vw] leading-[0.85] mt-6 text-foreground animate-fade-up">
             TENDER
           </h1>
-          <p className="font-serif italic text-xl md:text-3xl text-primary mt-8 animate-fade-up delay-100 max-w-2xl text-balance">
-            Your story, your way.
+          <p className="font-serif italic text-xl md:text-3xl text-primary mt-8 animate-fade-up delay-100 max-w-3xl text-balance">
+            Every imagination deserves to be written.
           </p>
           <p className="max-w-md mx-auto mt-6 text-muted-foreground text-sm md:text-base font-light tracking-wide animate-fade-up delay-200">
-            Every imagination deserves to be written. Bring your characters to life — in seconds.
+            Bring your characters to life — in seconds.
           </p>
 
           <div className="mt-14 animate-fade-up delay-300">
