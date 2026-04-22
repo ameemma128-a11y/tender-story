@@ -8,8 +8,9 @@ export default {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1280px" } },
     extend: {
       fontFamily: {
-        serif: ['"DM Serif Display"', 'Georgia', 'serif'],
-        sans: ['"Fira Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Bodoni Moda"', 'Didot', 'Georgia', 'serif'],
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Bodoni Moda"', 'Didot', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
