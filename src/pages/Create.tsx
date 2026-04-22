@@ -61,16 +61,16 @@ const TONES = [
   "Melancholic","Passionate & fiery","Tender & intimate","Mysterious & suspenseful",
 ];
 const STORY_STARTS = [
-  { id:"action", emoji:"💥", label:"In the action", desc:"We open right in the middle of a scene" },
-  { id:"encounter", emoji:"🌅", label:"A chance encounter", desc:"The characters meet unexpectedly" },
-  { id:"conflict", emoji:"⚔️", label:"A conflict", desc:"They start in opposition or tension" },
-  { id:"slow", emoji:"🎭", label:"A slow introduction", desc:"Progressive, atmospheric buildup" },
+  { id:"action", num:"I", label:"In the action", desc:"We open right in the middle of a scene" },
+  { id:"encounter", num:"II", label:"A chance encounter", desc:"The characters meet unexpectedly" },
+  { id:"conflict", num:"III", label:"A conflict", desc:"They start in opposition or tension" },
+  { id:"slow", num:"IV", label:"A slow introduction", desc:"Progressive, atmospheric buildup" },
 ];
 const ENDINGS = [
-  { id:"happy", emoji:"💕", label:"Happy ending", desc:"They end up together" },
-  { id:"tragic", emoji:"💔", label:"Tragic ending", desc:"Separation, sacrifice, or death" },
-  { id:"open", emoji:"🌀", label:"Open ending", desc:"Ambiguous — the reader decides" },
-  { id:"cliffhanger", emoji:"⚡", label:"Cliffhanger", desc:"Suspended — leaves you wanting more" },
+  { id:"happy", num:"I", label:"Happy ending", desc:"They end up together" },
+  { id:"tragic", num:"II", label:"Tragic ending", desc:"Separation, sacrifice, or death" },
+  { id:"open", num:"III", label:"Open ending", desc:"Ambiguous — the reader decides" },
+  { id:"cliffhanger", num:"IV", label:"Cliffhanger", desc:"Suspended — leaves you wanting more" },
 ];
 const LENGTHS = [
   { id:"short", label:"Short scene", desc:"500 words" },
@@ -89,10 +89,17 @@ const LANGUAGES = [
   { id:"Arabic", label:"العربية" },
 ];
 const PROTAGONIST_OPTIONS = [
-  "A mysterious young woman",
-  "A fierce independent woman",
-  "A gentle dreamer",
-  "A sharp and cunning mind",
+  "A mysterious soul with a hidden past",
+  "A fierce and unyielding spirit",
+  "A gentle dreamer lost in their own world",
+  "A sharp mind who sees what others miss",
+];
+
+const PRONOUNS = [
+  { id:"she", label:"She / Her" },
+  { id:"he", label:"He / Him" },
+  { id:"they", label:"They / Them" },
+  { id:"any", label:"No preference" },
 ];
 
 const TOTAL_STEPS = 9;
@@ -123,10 +130,12 @@ const Create = () => {
   const [contextNotes, setContextNotes] = useState("");
   const [includeReader, setIncludeReader] = useState<boolean | null>(null);
   const [readerName, setReaderName] = useState("");
+  const [readerPronouns, setReaderPronouns] = useState("none");
   const [readerTraits, setReaderTraits] = useState<string[]>([]);
   const [readerNotes, setReaderNotes] = useState("");
   const [protagonistChoice, setProtagonistChoice] = useState("");
   const [protagonistCustom, setProtagonistCustom] = useState("");
+  const [pronouns, setPronouns] = useState("any");
   const [characters, setCharacters] = useState<Character[]>([emptyCharacter()]);
   const [storyStart, setStoryStart] = useState("");
   const [tones, setTones] = useState<string[]>([]);
@@ -191,8 +200,10 @@ const Create = () => {
           characters: characters.filter(c => c.name.trim()),
           includeReader,
           readerName: includeReader ? readerName : null,
+          readerPronouns: includeReader ? readerPronouns : null,
           readerTraits: includeReader ? readerTraits : [],
           readerNotes: includeReader ? (readerNotes.trim() || null) : null,
+          pronouns: includeReader ? pronouns : null,
           protagonistDescription: !includeReader ? protagonistDescription : null,
           storyStart, tones, toneNotes: toneNotes.trim() || null,
           ending, endingCustom: endingCustom.trim() || null,
@@ -266,7 +277,7 @@ const Create = () => {
       <div className="absolute inset-0 bg-gradient-aurora opacity-40 pointer-events-none" />
       <div className="absolute inset-x-0 top-0 h-[60vh] candle-bloom pointer-events-none animate-flicker" />
 
-      <main className="relative z-10 max-w-3xl mx-auto px-4 md:px-6 pt-28 pb-24">
+      <main className="relative z-10 max-w-3xl mx-auto px-4 md:px-6 pt-28 pb-32 md:pb-24">
         {/* Progress */}
         <div className="flex items-center justify-between mb-12 gap-1 overflow-x-auto pb-2">
           {stepLabels.map((label, i) => {
@@ -347,6 +358,29 @@ const Create = () => {
                     <Input value={readerName} onChange={e => setReaderName(e.target.value)} placeholder="The name you want to go by in this story…" className="rounded-none h-12 mt-2 bg-transparent border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary text-lg font-serif px-0" />
                   </div>
                   <div>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">How should the story refer to you?</Label>
+                    <div className="grid grid-cols-2 gap-px bg-border">
+                      {PRONOUNS.map(p => (
+                        <button key={p.id} onClick={() => setReaderPronouns(p.id)}
+                          className={cn("p-4 text-left font-sans-ui text-[11px] uppercase tracking-[0.2em] transition-soft",
+                            readerPronouns === p.id ? "bg-primary text-primary-foreground" : "bg-background hover:bg-card hover:text-primary")}>
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">How should the story refer to you?</Label>
+                    <div className="grid grid-cols-2 gap-px bg-border">
+                      {PRONOUNS.map(p => (
+                        <button key={p.id} onClick={() => setPronouns(p.id)}
+                          className={cn("p-4 text-left transition-soft font-display text-lg", pronouns === p.id ? "bg-primary text-primary-foreground" : "bg-background hover:bg-card hover:text-primary")}>
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
                     <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">Your nature <span className="opacity-60 normal-case tracking-normal">— pick any</span></Label>
                     <div className="flex flex-wrap gap-2">{READER_TRAITS.map(t => <Tag key={t} active={readerTraits.includes(t)} onClick={() => toggle(readerTraits, setReaderTraits, t)} onDoubleClick={() => selectAndAdvance(readerTraits, setReaderTraits, t)}>{t}</Tag>)}</div>
                   </div>
@@ -425,7 +459,7 @@ const Create = () => {
                 {STORY_STARTS.map(s => (
                   <button key={s.id} onClick={() => setStoryStart(s.id)} onDoubleClick={() => { setStoryStart(s.id); setTimeout(goNext, 0); }}
                     className={cn("w-full p-6 text-left flex items-start gap-4 transition-soft", storyStart === s.id ? "bg-primary text-primary-foreground shadow-amber" : "bg-background hover:bg-card hover:text-primary")}>
-                    <span className="text-2xl">{s.emoji}</span>
+                    <span className={cn("font-display text-3xl w-10 shrink-0", storyStart === s.id ? "text-primary-foreground/60" : "text-primary/40")}>{s.num}</span>
                     <div>
                       <div className="font-display text-xl mb-1">{s.label}</div>
                       <div className={cn("text-[10px] uppercase tracking-[0.2em] font-sans-ui", storyStart === s.id ? "opacity-80" : "text-muted-foreground")}>{s.desc}</div>
@@ -460,7 +494,7 @@ const Create = () => {
                 {ENDINGS.map(e => (
                   <button key={e.id} onClick={() => { setEnding(e.id); setEndingCustom(""); }} onDoubleClick={() => { setEnding(e.id); setEndingCustom(""); setTimeout(goNext, 0); }}
                     className={cn("w-full p-6 text-left flex items-start gap-4 transition-soft", ending === e.id && !endingCustom ? "bg-primary text-primary-foreground shadow-amber" : "bg-background hover:bg-card hover:text-primary")}>
-                    <span className="text-2xl">{e.emoji}</span>
+                    <span className={cn("font-display text-3xl w-10 shrink-0", ending === e.id && !endingCustom ? "text-primary-foreground/60" : "text-primary/40")}>{e.num}</span>
                     <div>
                       <div className="font-display text-xl mb-1">{e.label}</div>
                       <div className={cn("text-[10px] uppercase tracking-[0.2em] font-sans-ui", ending === e.id && !endingCustom ? "opacity-80" : "text-muted-foreground")}>{e.desc}</div>
@@ -469,7 +503,7 @@ const Create = () => {
                 ))}
               </div>
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">✍️ Define your own ending <span className="opacity-60 normal-case tracking-normal">(optional)</span></Label>
+                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">Define your own ending <span className="opacity-60 normal-case tracking-normal">(optional)</span></Label>
                 <Textarea value={endingCustom} onChange={e => { setEndingCustom(e.target.value); if (e.target.value) setEnding(""); }} placeholder="They meet again years later, in a city neither of them meant to visit…" rows={3} className="rounded-none bg-transparent border border-border focus-visible:ring-0 focus-visible:border-primary font-serif text-base resize-none" />
               </div>
             </>
@@ -513,7 +547,7 @@ const Create = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-16 pt-8 border-t border-border">
+        <div className="flex items-center justify-between mt-12 pt-6 border-t border-border sticky bottom-0 md:static bg-background/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none pb-6 md:pb-0 -mx-4 md:mx-0 px-4 md:px-0">
           <Button variant="ghost" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1 || generating} className="text-[11px] uppercase tracking-[0.3em] hover:text-primary hover:bg-transparent font-sans-ui">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
