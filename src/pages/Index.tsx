@@ -57,19 +57,16 @@ const Index = () => {
           className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center"
           style={{ transform: `translateY(${scrollY * -0.25}px)`, opacity: Math.max(0, 1 - scrollY / 500) }}
         >
-          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.6em] text-primary/90 animate-fade-in">
-            — A Platform for Storytellers —
-          </p>
-          <h1 className="font-display text-[22vw] md:text-[14vw] leading-[0.85] mt-6 text-foreground animate-fade-up">
-            TENDER
+          <h1 className="font-display text-[26vw] md:text-[16vw] leading-[0.85] text-accent italic animate-fade-up drop-shadow-[0_0_60px_hsl(38_70%_55%/0.35)]">
+            Tender
           </h1>
-          <p className="font-serif italic text-xl md:text-3xl text-primary mt-8 animate-fade-up delay-100 max-w-3xl text-balance">
-            Every imagination deserves to be written. Bring your characters to life — in seconds.
+          <p className="font-serif italic text-xl md:text-2xl text-foreground/85 mt-10 animate-fade-up delay-200 max-w-2xl text-balance">
+            Every imagination deserves to be written.
           </p>
 
-          <div className="mt-14 animate-fade-up delay-300">
+          <div className="mt-16 animate-fade-up delay-300">
             <HeartButton glow onClick={() => navigate("/create")}>
-              Start writing
+              Begin your story
             </HeartButton>
           </div>
         </div>
