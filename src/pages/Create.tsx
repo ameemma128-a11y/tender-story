@@ -27,6 +27,12 @@ const UNIVERSE_GENRES = [
   "War Romance", "Political Intrigue", "Mafia Romance",
 ];
 
+const ACTION_GENRES = [
+  "Mystery & Investigation", "Spy Romance", "Survival Game", "Assassin's Code",
+  "Heist Story", "Psychological Thriller", "Conspiracy", "Dark Academia",
+  "Crime & Redemption", "Forbidden Mission", "Underground World", "Power Struggle",
+];
+
 const CONTEXTS = [
   "Modern day", "Royal court", "Fantasy world", "Magic academy", "Post-apocalyptic",
   "Historical era", "Corporate world", "Small town", "Supernatural realm",
@@ -40,6 +46,8 @@ const CHARACTER_TRAITS = [
   "Soft & caring", "Dominant & commanding", "Broken & guarded",
   "Charismatic & charming", "Ruthless & ambitious", "Loyal & devoted",
   "Rebellious & wild", "Quiet & observant",
+  "Yearner / Golden Retriever", "Sunshine personality", "Morally grey",
+  "Stoic protector", "Cunning & calculating", "Gentle giant", "Emotionally unavailable",
 ];
 
 const READER_TRAITS = [
@@ -49,12 +57,14 @@ const READER_TRAITS = [
   "Serious & focused", "Sweet & gentle", "Cold outside warm inside",
   "Chaotic & unpredictable", "Observant & intelligent", "Passionate & intense",
   "Carefree & spontaneous", "Stubborn & determined",
+  "Yearner / Golden Retriever", "Sunshine personality", "Morally grey",
+  "Quietly observant", "Fiercely loyal", "Emotionally complex",
 ];
 
 const TONES = [
-  "Sweet romance", "Intense & dramatic", "Suggestive", "Angst & emotional",
-  "Dark & complex", "Slow burn tension", "Lighthearted & fun", "Bittersweet",
-  "Chaotic & unpredictable", "Obsessive & intense", "Hopeful & healing",
+  "Sweet romance", "Intense & dramatic", "Suggestive", "Sensual", "Suggestive & steamy",
+  "Angst & emotional", "Dark & complex", "Slow burn tension", "Lighthearted & fun",
+  "Bittersweet", "Chaotic & unpredictable", "Obsessive & intense", "Hopeful & healing",
   "Melancholic", "Passionate & fiery", "Tender & intimate", "Mysterious & suspenseful",
 ];
 
@@ -64,7 +74,19 @@ const LENGTHS = [
   { id: "multi", label: "Multi-chapter", desc: "3000+ words" },
 ];
 
-const TOTAL_STEPS = 6;
+const LANGUAGES = [
+  { id: "English", label: "English" },
+  { id: "French", label: "Français" },
+  { id: "Spanish", label: "Español" },
+  { id: "Portuguese", label: "Português" },
+  { id: "Korean", label: "한국어" },
+  { id: "Japanese", label: "日本語" },
+  { id: "German", label: "Deutsch" },
+  { id: "Italian", label: "Italiano" },
+  { id: "Arabic", label: "العربية" },
+];
+
+const TOTAL_STEPS = 7;
 
 const Tag = ({
   active, onClick, onDoubleClick, children,
@@ -79,9 +101,9 @@ const Tag = ({
     onClick={onClick}
     onDoubleClick={onDoubleClick}
     className={cn(
-      "px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-soft border select-none",
+      "px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-soft border select-none font-sans-ui",
       active
-        ? "bg-primary text-primary-foreground border-primary shadow-ember"
+        ? "bg-primary text-primary-foreground border-primary shadow-amber"
         : "bg-transparent text-foreground/80 border-border hover:border-primary hover:text-primary"
     )}
   >
@@ -112,11 +134,15 @@ const Create = () => {
   const [readerTraits, setReaderTraits] = useState<string[]>([]);
   const [readerNotes, setReaderNotes] = useState("");
 
-  // Step 5 — tone
+  // Step 5 — tone (+ free text mood)
   const [tones, setTones] = useState<string[]>([]);
+  const [toneNotes, setToneNotes] = useState("");
 
   // Step 6 — length
   const [length, setLength] = useState("chapter");
+
+  // Step 7 — language
+  const [language, setLanguage] = useState("English");
 
   const [generating, setGenerating] = useState(false);
 
@@ -129,10 +155,11 @@ const Create = () => {
 
   const canNext = () => {
     if (step === 1) return genres.length > 0 || storyIdea.trim().length > 0;
-    if (step === 2) return true; // optional
+    if (step === 2) return true;
     if (step === 3) return characterName.trim().length > 0;
     if (step === 4) return !includeReader || readerName.trim().length > 0;
-    if (step === 5) return tones.length > 0;
+    if (step === 5) return tones.length > 0 || toneNotes.trim().length > 0;
+    if (step === 6) return true;
     return true;
   };
 
@@ -171,7 +198,9 @@ const Create = () => {
           readerTraits: includeReader ? readerTraits : [],
           readerNotes: includeReader ? (readerNotes.trim() || null) : null,
           tones,
+          toneNotes: toneNotes.trim() || null,
           length,
+          language,
         }),
       });
 
@@ -210,7 +239,6 @@ const Create = () => {
       const title = match ? match[1].trim() : fallbackTitle;
       const body = content.replace(/^#\s+.+\n+/, "");
 
-      // Persist using the existing schema (template = first selected genre, slugified)
       const templateSlug = (genres[0] ?? "custom").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       const combinedCharacterNotes = [
         characterNotes.trim(),
@@ -218,6 +246,8 @@ const Create = () => {
         contextNotes.trim() ? `Universe notes: ${contextNotes.trim()}` : "",
         genres.length ? `Genres: ${genres.join(", ")}` : "",
         storyIdea.trim() ? `Idea: ${storyIdea.trim()}` : "",
+        toneNotes.trim() ? `Mood: ${toneNotes.trim()}` : "",
+        `Language: ${language}`,
       ].filter(Boolean).join(" | ") || null;
 
       const { data: saved, error } = await supabase.from("stories").insert({
@@ -240,12 +270,13 @@ const Create = () => {
     }
   };
 
-  const stepLabels = ["Genre", "World", "Character", "You", "Tone", "Length"];
+  const stepLabels = ["Genre", "World", "Character", "You", "Tone", "Length", "Language"];
 
   return (
     <div className="min-h-screen bg-gradient-noir relative grain">
       <Header />
-      <div className="absolute inset-0 bg-gradient-ember opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-aurora opacity-40 pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-[60vh] candle-bloom pointer-events-none animate-flicker" />
 
       <main className="relative z-10 max-w-3xl mx-auto px-6 pt-32 pb-20">
         <div className="flex items-center justify-between mb-16 gap-2">
@@ -258,7 +289,7 @@ const Create = () => {
                   <span className={cn("font-display text-xs", n <= step ? "text-primary" : "text-muted-foreground")}>
                     0{n}
                   </span>
-                  <span className={cn("text-[9px] uppercase tracking-[0.2em] truncate", n === step ? "text-foreground" : "text-muted-foreground")}>
+                  <span className={cn("text-[9px] uppercase tracking-[0.2em] truncate font-sans-ui", n === step ? "text-foreground" : "text-muted-foreground")}>
                     {label}
                   </span>
                 </div>
@@ -271,12 +302,12 @@ const Create = () => {
           {/* STEP 1 — Genre */}
           {step === 1 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step One</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Pick your genres.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step One</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Pick your genres.</h2>
               <p className="text-muted-foreground mb-8 font-light">Select any combination — or describe your own idea.</p>
 
               <div className="mb-10">
-                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                   Have your own idea? <span className="opacity-60 normal-case tracking-normal">(optional)</span>
                 </Label>
                 <Textarea
@@ -289,30 +320,24 @@ const Create = () => {
               </div>
 
               <Tabs defaultValue="romance" className="w-full">
-                <TabsList className="rounded-none bg-transparent border border-border p-0 h-auto w-full grid grid-cols-2">
-                  <TabsTrigger
-                    value="romance"
-                    className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.3em] py-3"
-                  >
+                <TabsList className="rounded-none bg-transparent border border-border p-0 h-auto w-full grid grid-cols-3">
+                  <TabsTrigger value="romance" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[10px] uppercase tracking-[0.25em] py-3 font-sans-ui">
                     Romance
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="universe"
-                    className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[11px] uppercase tracking-[0.3em] py-3"
-                  >
-                    Universe & Adventure
+                  <TabsTrigger value="universe" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[10px] uppercase tracking-[0.25em] py-3 font-sans-ui">
+                    Universe & Fantasy
+                  </TabsTrigger>
+                  <TabsTrigger value="action" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[10px] uppercase tracking-[0.25em] py-3 font-sans-ui">
+                    Action & Thriller
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="romance" className="mt-6">
                   <div className="flex flex-wrap gap-2">
                     {ROMANCE_GENRES.map(g => (
-                      <Tag
-                        key={g}
-                        active={genres.includes(g)}
+                      <Tag key={g} active={genres.includes(g)}
                         onClick={() => toggle(genres, setGenres, g)}
-                        onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}
-                      >
+                        onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}>
                         {g}
                       </Tag>
                     ))}
@@ -322,12 +347,21 @@ const Create = () => {
                 <TabsContent value="universe" className="mt-6">
                   <div className="flex flex-wrap gap-2">
                     {UNIVERSE_GENRES.map(g => (
-                      <Tag
-                        key={g}
-                        active={genres.includes(g)}
+                      <Tag key={g} active={genres.includes(g)}
                         onClick={() => toggle(genres, setGenres, g)}
-                        onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}
-                      >
+                        onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}>
+                        {g}
+                      </Tag>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="action" className="mt-6">
+                  <div className="flex flex-wrap gap-2">
+                    {ACTION_GENRES.map(g => (
+                      <Tag key={g} active={genres.includes(g)}
+                        onClick={() => toggle(genres, setGenres, g)}
+                        onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}>
                         {g}
                       </Tag>
                     ))}
@@ -336,7 +370,7 @@ const Create = () => {
               </Tabs>
 
               {genres.length > 0 && (
-                <p className="mt-6 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                <p className="mt-6 text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-sans-ui">
                   {genres.length} selected
                 </p>
               )}
@@ -346,25 +380,22 @@ const Create = () => {
           {/* STEP 2 — Universe / Context */}
           {step === 2 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Two</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Set the universe.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Two</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Set the universe.</h2>
               <p className="text-muted-foreground mb-10 font-light">Where does this take place? Pick any.</p>
 
               <div className="flex flex-wrap gap-2 mb-10">
                 {CONTEXTS.map(c => (
-                  <Tag
-                    key={c}
-                    active={contexts.includes(c)}
+                  <Tag key={c} active={contexts.includes(c)}
                     onClick={() => toggle(contexts, setContexts, c)}
-                    onDoubleClick={() => selectAndAdvance(contexts, setContexts, c)}
-                  >
+                    onDoubleClick={() => selectAndAdvance(contexts, setContexts, c)}>
                     {c}
                   </Tag>
                 ))}
               </div>
 
               <div>
-                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                   Describe the world in your own words <span className="opacity-60 normal-case tracking-normal">(optional)</span>
                 </Label>
                 <Textarea
@@ -381,8 +412,8 @@ const Create = () => {
           {/* STEP 3 — Character */}
           {step === 3 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Three</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Your main character.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Three</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Your main character.</h2>
               <p className="text-muted-foreground mb-10 font-light">Who's at the heart of this story?</p>
               <Input
                 value={characterName}
@@ -395,24 +426,21 @@ const Create = () => {
               {characterName.trim() && (
                 <div className="mt-10 animate-fade-up space-y-6">
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                       Their personality <span className="opacity-60 normal-case tracking-normal">— pick any</span>
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {CHARACTER_TRAITS.map(t => (
-                        <Tag
-                          key={t}
-                          active={characterTraits.includes(t)}
+                        <Tag key={t} active={characterTraits.includes(t)}
                           onClick={() => toggle(characterTraits, setCharacterTraits, t)}
-                          onDoubleClick={() => selectAndAdvance(characterTraits, setCharacterTraits, t)}
-                        >
+                          onDoubleClick={() => selectAndAdvance(characterTraits, setCharacterTraits, t)}>
                           {t}
                         </Tag>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                       Anything else about them? <span className="opacity-60 normal-case tracking-normal">(optional)</span>
                     </Label>
                     <Textarea
@@ -431,8 +459,8 @@ const Create = () => {
           {/* STEP 4 — Reader */}
           {step === 4 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Four</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Make it yours.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Four</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Make it yours.</h2>
               <p className="text-muted-foreground mb-10 font-light">Add yourself to the story, or stay behind the scenes.</p>
               <div className="flex items-center justify-between p-6 border border-border mb-6">
                 <Label htmlFor="reader" className="text-base font-display">Put me in the story</Label>
@@ -441,29 +469,26 @@ const Create = () => {
               {includeReader && (
                 <div className="animate-fade-up space-y-6">
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Your name</Label>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-sans-ui">Your name</Label>
                     <Input value={readerName} onChange={e => setReaderName(e.target.value)}
                       className="rounded-none h-12 mt-2 bg-transparent border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary text-lg font-serif px-0" />
                   </div>
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                       Your nature <span className="opacity-60 normal-case tracking-normal">— pick any</span>
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {READER_TRAITS.map(t => (
-                        <Tag
-                          key={t}
-                          active={readerTraits.includes(t)}
+                        <Tag key={t} active={readerTraits.includes(t)}
                           onClick={() => toggle(readerTraits, setReaderTraits, t)}
-                          onDoubleClick={() => selectAndAdvance(readerTraits, setReaderTraits, t)}
-                        >
+                          onDoubleClick={() => selectAndAdvance(readerTraits, setReaderTraits, t)}>
                           {t}
                         </Tag>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
                       Describe yourself in your own words <span className="opacity-60 normal-case tracking-normal">(optional)</span>
                     </Label>
                     <Textarea
@@ -482,20 +507,29 @@ const Create = () => {
           {/* STEP 5 — Tone */}
           {step === 5 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Five</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Set the tone.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Five</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Set the tone.</h2>
               <p className="text-muted-foreground mb-10 font-light">Pick the emotional flavor of your story.</p>
               <div className="flex flex-wrap gap-3">
                 {TONES.map(t => (
-                  <Tag
-                    key={t}
-                    active={tones.includes(t)}
+                  <Tag key={t} active={tones.includes(t)}
                     onClick={() => toggle(tones, setTones, t)}
-                    onDoubleClick={() => selectAndAdvance(tones, setTones, t)}
-                  >
+                    onDoubleClick={() => selectAndAdvance(tones, setTones, t)}>
                     {t}
                   </Tag>
                 ))}
+              </div>
+              <div className="mt-10">
+                <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block font-sans-ui">
+                  Describe the exact mood you want <span className="opacity-60 normal-case tracking-normal">(optional)</span>
+                </Label>
+                <Textarea
+                  value={toneNotes}
+                  onChange={e => setToneNotes(e.target.value)}
+                  placeholder="Slow-burning ache, tender silences, a single touch that undoes everything…"
+                  rows={3}
+                  className="rounded-none bg-transparent border border-border focus-visible:ring-0 focus-visible:border-primary font-serif text-base resize-none"
+                />
               </div>
             </>
           )}
@@ -503,24 +537,51 @@ const Create = () => {
           {/* STEP 6 — Length */}
           {step === 6 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Six</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Choose the length.</h2>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Six</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Choose the length.</h2>
               <p className="text-muted-foreground mb-10 font-light">How long do you want your story to be?</p>
               <div className="space-y-px bg-border">
                 {LENGTHS.map(l => (
                   <button
                     key={l.id}
                     onClick={() => setLength(l.id)}
-                    onDoubleClick={() => { setLength(l.id); setTimeout(handleGenerate, 0); }}
+                    onDoubleClick={() => { setLength(l.id); setTimeout(goNext, 0); }}
                     disabled={generating}
                     className={cn(
                       "w-full p-6 text-left flex justify-between items-center transition-soft",
                       length === l.id
-                        ? "bg-primary text-primary-foreground shadow-ember"
+                        ? "bg-primary text-primary-foreground shadow-amber"
                         : "bg-background hover:bg-card hover:text-primary"
                     )}>
                     <span className="font-display text-2xl">{l.label}</span>
-                    <span className={cn("text-[10px] uppercase tracking-[0.3em]", length === l.id ? "opacity-90" : "text-muted-foreground")}>{l.desc}</span>
+                    <span className={cn("text-[10px] uppercase tracking-[0.3em] font-sans-ui", length === l.id ? "opacity-90" : "text-muted-foreground")}>{l.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* STEP 7 — Language */}
+          {step === 7 && (
+            <>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3 font-sans-ui">Step Seven</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3 italic">Choose your story language.</h2>
+              <p className="text-muted-foreground mb-10 font-light">Your story will be written entirely in this language.</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border">
+                {LANGUAGES.map(l => (
+                  <button
+                    key={l.id}
+                    onClick={() => setLanguage(l.id)}
+                    onDoubleClick={() => { setLanguage(l.id); setTimeout(handleGenerate, 0); }}
+                    disabled={generating}
+                    className={cn(
+                      "p-5 text-left transition-soft",
+                      language === l.id
+                        ? "bg-primary text-primary-foreground shadow-amber"
+                        : "bg-background hover:bg-card hover:text-primary"
+                    )}>
+                    <div className="font-display text-xl">{l.label}</div>
+                    <div className={cn("text-[10px] uppercase tracking-[0.3em] mt-1 font-sans-ui", language === l.id ? "opacity-90" : "text-muted-foreground")}>{l.id}</div>
                   </button>
                 ))}
               </div>
@@ -530,13 +591,13 @@ const Create = () => {
 
         <div className="flex items-center justify-between mt-16 pt-8 border-t border-border">
           <Button variant="ghost" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1 || generating}
-            className="text-[11px] uppercase tracking-[0.3em] hover:text-primary hover:bg-transparent">
+            className="text-[11px] uppercase tracking-[0.3em] hover:text-primary hover:bg-transparent font-sans-ui">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
 
           {step < TOTAL_STEPS ? (
             <button onClick={goNext} disabled={!canNext()}
-              className="group flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-foreground hover:text-primary disabled:opacity-30 disabled:hover:text-foreground transition-soft">
+              className="group flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-foreground hover:text-primary disabled:opacity-30 disabled:hover:text-foreground transition-soft font-sans-ui">
               Continue <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-soft" />
             </button>
           ) : (
