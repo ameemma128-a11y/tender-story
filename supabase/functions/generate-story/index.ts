@@ -6,23 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const TEMPLATE_PROMPTS: Record<string, string> = {
-  "toxic-love": "a magnetic, push-and-pull dynamic full of tension and addictive chemistry",
-  "enemies-to-lovers": "two people who clash constantly until rivalry slowly turns into undeniable attraction",
-  "royal-romance": "a regal, opulent setting with court intrigue and a forbidden royal connection",
-  "fantasy-academy": "a magical academy with secret powers, rivals, and a slow-burn bond",
-  "villains-revenge": "a dark, morally grey villain whose vendetta becomes entangled with desire",
-  "secret-admirer": "anonymous notes, lingering glances, and the slow unveiling of who is watching",
-  "arranged-marriage": "two strangers bound by duty, learning each other in stolen moments",
-  "forbidden-bond": "a connection that everyone forbids, growing more intense the more it's denied",
-};
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const {
-      template, characterName, characterTraits, characterNotes,
+      // new shape
+      genres, storyIdea, contexts, contextNotes,
+      // legacy shape (still tolerated)
+      template,
+      // common
+      characterName, characterTraits, characterNotes,
       readerName, readerTraits, readerNotes, tones, length,
     } = await req.json();
 
@@ -30,7 +24,20 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const wordTarget = length === "short" ? 500 : length === "chapter" ? 1500 : 3000;
-    const vibe = TEMPLATE_PROMPTS[template] ?? "an immersive romantic story";
+
+    const genreList: string[] = Array.isArray(genres) && genres.length
+      ? genres
+      : (template ? [String(template).replace(/-/g, " ")] : []);
+    const ctxList: string[] = Array.isArray(contexts) ? contexts : [];
+
+    const vibe = genreList.length
+      ? `a story that blends these genres: ${genreList.join(", ")}`
+      : "an immersive romantic story";
+
+    const ideaBlock = storyIdea ? `Reader's own idea (must shape the story): ${storyIdea}.` : "";
+    const worldBlock = ctxList.length || contextNotes
+      ? `Setting${ctxList.length ? `: ${ctxList.join(", ")}` : ""}${contextNotes ? `. World details: ${contextNotes}` : ""}.`
+      : "";
 
     const charBlock = `Love interest: "${characterName}"${
       characterTraits?.length ? `. Personality: ${characterTraits.join(", ")}` : ""
@@ -44,11 +51,13 @@ serve(async (req) => {
 
     const system = `You are Tender, a gifted storyteller crafting deeply immersive, emotionally rich personalized stories.
 Style: cinematic, sensorial, present tense, evocative imagery, intimate inner thoughts, vivid dialogue.
-Always respect the user's chosen tone. Avoid cringe; aim for elegant, literary prose.
-Begin with a captivating hook. End with a resonant beat.`;
+Always respect the user's chosen tone and blend ALL selected genres and world elements coherently.
+Avoid cringe; aim for elegant, literary prose. Begin with a captivating hook. End with a resonant beat.`;
 
     const user = `Write an immersive story (~${wordTarget} words).
-Trope: ${vibe}.
+Genre blend: ${vibe}.
+${ideaBlock}
+${worldBlock}
 ${charBlock}
 Tone: ${tones?.join(", ") || "sweet romance"}.
 ${reader}

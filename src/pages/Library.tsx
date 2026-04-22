@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { BookOpen, Pencil, Check, X, ImagePlus, Loader2 } from "lucide-react";
+import { BookOpen, Pencil, Check, X, ImagePlus, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -103,10 +103,19 @@ const Library = () => {
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20">
-        <div className="mb-12">
-          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— Your Library —</p>
-          <h1 className="font-display text-5xl md:text-6xl mb-2">Bookshelf</h1>
-          <p className="text-muted-foreground font-light">Every story you've written, kept close.</p>
+        <div className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— Your Library —</p>
+            <h1 className="font-display text-5xl md:text-6xl mb-2">Bookshelf</h1>
+            <p className="text-muted-foreground font-light">Every story you've written, kept close.</p>
+          </div>
+          <Button
+            onClick={() => navigate("/create")}
+            className="group rounded-none text-[11px] uppercase tracking-[0.3em] h-12 px-6 shadow-ember self-start sm:self-auto"
+          >
+            Write a new story
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-soft" />
+          </Button>
         </div>
 
         {loading ? (
