@@ -18,7 +18,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
 interface Story { id:string; title:string; template:string; created_at:string; cover_url:string|null; user_id:string; }
 
 const T: Record<string, Record<string, string>> = {
-  en: { bookshelf:tr("bookshelf"), sub:tr("sub"), new_story:tr("new_story"), empty:tr("empty"), write_first:tr("write_first"), add_cover:tr("add_cover"), change_cover:tr("change_cover"), rewrite:tr("rewrite") },
+  en: { bookshelf:"Bookshelf", sub:"Every story you've written, kept close.", new_story:"Write a new story", empty:"Your shelf is empty.", write_first:"Write your first", add_cover:"Add cover", change_cover:"Change cover", rewrite:"Rewrite" },
   fr: { bookshelf:"Bibliothèque", sub:"Toutes vos histoires, toujours proches.", new_story:"Écrire une nouvelle histoire", empty:"Votre bibliothèque est vide.", write_first:"Écrire la première", add_cover:"Ajouter couverture", change_cover:"Changer couverture", rewrite:"Réécrire" },
   es: { bookshelf:"Biblioteca", sub:"Cada historia que has escrito, siempre cerca.", new_story:"Escribir una nueva historia", empty:"Tu biblioteca está vacía.", write_first:"Escribir la primera", add_cover:"Añadir portada", change_cover:"Cambiar portada", rewrite:"Reescribir" },
   pt: { bookshelf:"Biblioteca", sub:"Cada história que você escreveu, sempre perto.", new_story:"Escrever uma nova história", empty:"Sua biblioteca está vazia.", write_first:"Escrever a primeira", add_cover:"Adicionar capa", change_cover:"Trocar capa", rewrite:"Reescrever" },
@@ -70,7 +70,9 @@ const Library = () => {
   const triggerCover = (id: string) => { setPendingCoverFor(id); fileInputRef.current?.click(); };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; const id = pendingCoverFor; e.target.value = "";
+    const file = e.target.files?.[0];
+    const id = pendingCoverFor;
+    e.target.value = "";
     if (!file || !id || !userId) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
     setUploadingId(id);
@@ -93,15 +95,16 @@ const Library = () => {
       <Header />
       <div className="absolute inset-0 bg-gradient-ember opacity-20 pointer-events-none" />
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+
       <main className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 pt-28 md:pt-32 pb-20">
         <div className="mb-10 md:mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— Your Library —</p>
-            <h1 className="font-display text-4xl md:text-6xl mb-2">Bookshelf</h1>
-            <p className="text-muted-foreground font-light">Every story you've written, kept close.</p>
+            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— {tr("bookshelf")} —</p>
+            <h1 className="font-display text-4xl md:text-6xl mb-2">{tr("bookshelf")}</h1>
+            <p className="text-muted-foreground font-light text-sm">{tr("sub")}</p>
           </div>
           <Button onClick={() => navigate("/create")} className="group rounded-none text-[11px] uppercase tracking-[0.3em] h-12 px-6 shadow-ember self-start sm:self-auto">
-            Write a new story <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-soft" />
+            {tr("new_story")} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-soft" />
           </Button>
         </div>
 
@@ -110,21 +113,20 @@ const Library = () => {
         ) : stories.length === 0 ? (
           <div className="text-center py-20 border border-border">
             <BookOpen className="w-8 h-8 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-6 font-light">Your shelf is empty.</p>
-            <Button onClick={() => navigate("/create")} className="rounded-none text-[11px] uppercase tracking-[0.3em]">Write your first</Button>
+            <p className="text-muted-foreground mb-6 font-light">{tr("empty")}</p>
+            <Button onClick={() => navigate("/create")} className="rounded-none text-[11px] uppercase tracking-[0.3em]">{tr("write_first")}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-12">
             {stories.map(s => (
               <div key={s.id} className="group">
-                <button onClick={() => navigate(`/story/${s.id}`)}
-                  className={cn("relative w-full aspect-[2/3] overflow-hidden border border-border shadow-luxe transition-soft group-hover:shadow-ember group-hover:-translate-y-1", !s.cover_url && "bg-gradient-to-br from-card via-background to-card")}>
+                <button onClick={() => navigate(`/story/${s.id}`)} className={cn("relative w-full aspect-[2/3] overflow-hidden border border-border shadow-luxe transition-soft group-hover:shadow-ember group-hover:-translate-y-1", !s.cover_url && "bg-gradient-to-br from-card via-background to-card")}>
                   {s.cover_url ? (
                     <img src={s.cover_url} alt={s.title} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
                       <span className="text-[8px] uppercase tracking-[0.3em] text-primary mb-3">{TEMPLATE_LABELS[s.template] ?? s.template}</span>
-                      <span className="font-display text-base md:text-xl leading-tight text-foreground/90 line-clamp-4">{s.title}</span>
+                      <span className="font-display text-base leading-tight text-foreground/90 line-clamp-4">{s.title}</span>
                       <span className="absolute bottom-3 left-0 right-0 text-[7px] uppercase tracking-[0.4em] text-muted-foreground">Tender</span>
                     </div>
                   )}
@@ -134,32 +136,28 @@ const Library = () => {
                 <div className="mt-3 md:mt-4">
                   {editingId === s.id ? (
                     <div className="flex items-center gap-1">
-                      <Input value={editValue} onChange={e => setEditValue(e.target.value)}
-                        onKeyDown={e => { if (e.key === "Enter") saveEdit(s.id); if (e.key === "Escape") cancelEdit(); }}
-                        autoFocus className="h-8 rounded-none bg-transparent border-0 border-b border-primary text-sm font-display px-0 focus-visible:ring-0" />
+                      <Input value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => { if (e.key === "Enter") saveEdit(s.id); if (e.key === "Escape") cancelEdit(); }} autoFocus className="h-8 rounded-none bg-transparent border-0 border-b border-primary text-sm font-display px-0 focus-visible:ring-0" />
                       <button onClick={() => saveEdit(s.id)} className="text-primary p-1"><Check className="w-3.5 h-3.5" /></button>
                       <button onClick={cancelEdit} className="text-muted-foreground p-1"><X className="w-3.5 h-3.5" /></button>
                     </div>
                   ) : (
                     <div className="flex items-start justify-between gap-2">
-                      <button onClick={() => navigate(`/story/${s.id}`)} className="font-display text-sm md:text-base leading-tight text-left hover:text-primary transition-soft line-clamp-2 flex-1">{s.title}</button>
+                      <button onClick={() => navigate(`/story/${s.id}`)} className="font-display text-sm leading-tight text-left hover:text-primary transition-soft line-clamp-2 flex-1">{s.title}</button>
                       <button onClick={() => startEdit(s)} className="text-muted-foreground hover:text-primary p-1 -mt-1 shrink-0"><Pencil className="w-3 h-3" /></button>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 mt-1.5 text-[8px] md:text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
+                  <div className="flex items-center gap-2 mt-1.5 text-[8px] uppercase tracking-[0.25em] text-muted-foreground">
                     <span className="truncate">{TEMPLATE_LABELS[s.template] ?? s.template}</span>
                     <span className="w-1 h-1 bg-primary/60 rounded-full shrink-0" />
                     <span className="shrink-0">{new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                   </div>
                   <div className="flex flex-col gap-1.5 mt-2">
-                    <button onClick={() => triggerCover(s.id)} disabled={uploadingId === s.id}
-                      className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft disabled:opacity-50">
+                    <button onClick={() => triggerCover(s.id)} disabled={uploadingId === s.id} className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft disabled:opacity-50">
                       {uploadingId === s.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
                       {s.cover_url ? tr("change_cover") : tr("add_cover")}
                     </button>
-                    <button onClick={() => navigate("/create")}
-                      className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft">
-                      <RotateCcw className="w-3 h-3" /> Rewrite
+                    <button onClick={() => navigate("/create")} className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.2em] text-foreground/60 hover:text-primary transition-soft">
+                      <RotateCcw className="w-3 h-3" /> {tr("rewrite")}
                     </button>
                   </div>
                 </div>
