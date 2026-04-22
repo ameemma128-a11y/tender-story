@@ -171,9 +171,9 @@ const Create = () => {
         <div key={step} className="animate-fade-up">
           {step === 1 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Movement One</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Choose the universe.</h2>
-              <p className="text-muted-foreground mb-10 font-light">The trope sets the gravity of the story.</p>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step One</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3">Pick a world.</h2>
+              <p className="text-muted-foreground mb-10 font-light">Choose the genre that sets the mood.</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
                 {TEMPLATES.map(t => (
                   <button key={t.id} onClick={() => setTemplate(t.id)}
@@ -195,9 +195,9 @@ const Create = () => {
 
           {step === 2 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Movement Two</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Cast the obsession.</h2>
-              <p className="text-muted-foreground mb-10 font-light">A name. The figure at the center of your dark.</p>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Two</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3">Your main character.</h2>
+              <p className="text-muted-foreground mb-10 font-light">Who's at the heart of this story?</p>
               <Input
                 value={characterName}
                 onChange={e => setCharacterName(e.target.value)}
@@ -210,11 +210,11 @@ const Create = () => {
 
           {step === 3 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Movement Three</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Step inside?</h2>
-              <p className="text-muted-foreground mb-10 font-light">Or remain the unseen narrator.</p>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Three</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3">Make it yours.</h2>
+              <p className="text-muted-foreground mb-10 font-light">Add yourself to the story, or stay behind the scenes.</p>
               <div className="flex items-center justify-between p-6 border border-border mb-6">
-                <Label htmlFor="reader" className="text-base font-display">Place me in the story</Label>
+                <Label htmlFor="reader" className="text-base font-display">Put me in the story</Label>
                 <Switch id="reader" checked={includeReader} onCheckedChange={setIncludeReader} />
               </div>
               {includeReader && (
@@ -239,9 +239,9 @@ const Create = () => {
 
           {step === 4 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Movement Four</p>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Four</p>
               <h2 className="font-display text-5xl md:text-6xl mb-3">Set the tone.</h2>
-              <p className="text-muted-foreground mb-10 font-light">The emotional weather of the chapter.</p>
+              <p className="text-muted-foreground mb-10 font-light">Pick the emotional flavor of your story.</p>
               <div className="flex flex-wrap gap-3">
                 {TONES.map(t => (
                   <Tag key={t} active={tones.includes(t)} onClick={() => toggle(tones, setTones, t)}>{t}</Tag>
@@ -252,9 +252,9 @@ const Create = () => {
 
           {step === 5 && (
             <>
-              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Movement Five</p>
-              <h2 className="font-display text-5xl md:text-6xl mb-3">Choose the form.</h2>
-              <p className="text-muted-foreground mb-10 font-light">How deep do you want to fall?</p>
+              <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">Step Five</p>
+              <h2 className="font-display text-5xl md:text-6xl mb-3">Choose the length.</h2>
+              <p className="text-muted-foreground mb-10 font-light">How long do you want your story to be?</p>
               <div className="space-y-px bg-border">
                 {LENGTHS.map(l => (
                   <button key={l.id} onClick={() => setLength(l.id)}
@@ -286,7 +286,7 @@ const Create = () => {
             </button>
           ) : (
             <HeartButton glow onClick={handleGenerate} disabled={generating}>
-              {generating ? (<><Loader2 className="w-4 h-4 animate-spin mr-2" /> Composing…</>) : "Compose the chapter"}
+              {generating ? (<><Loader2 className="w-4 h-4 animate-spin mr-2" /> Writing…</>) : "Write my story"}
             </HeartButton>
           )}
         </div>
