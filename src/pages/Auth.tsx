@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/Header";
+import { HeartButton } from "@/components/HeartButton";
 import { toast } from "sonner";
-import { Heart } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const Auth = () => {
           options: { emailRedirectTo: `${window.location.origin}/create` },
         });
         if (error) throw error;
-        toast.success("Welcome to Tender ✨");
+        toast.success("Welcome to Tender");
         navigate("/create");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -52,47 +52,58 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden flex items-center justify-center px-6">
+    <div className="min-h-screen bg-gradient-noir relative overflow-hidden flex items-center justify-center px-6 grain">
       <Header />
-      <div className="bokeh absolute inset-0 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-ember opacity-40 pointer-events-none" />
+      {/* Decorative crimson ring */}
+      <div className="absolute -left-40 -top-40 w-[500px] h-[500px] rounded-full border border-primary/20 pointer-events-none" />
+      <div className="absolute -right-60 -bottom-60 w-[700px] h-[700px] rounded-full border border-primary/10 pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md bg-card/80 backdrop-blur-md p-10 rounded-3xl shadow-soft border border-border/50 animate-fade-up">
-        <div className="flex flex-col items-center mb-8">
-          <Heart className="w-8 h-8 text-primary fill-primary/30 animate-heartbeat" />
-          <h1 className="font-serif text-3xl mt-3">{mode === "signin" ? "Welcome back" : "Begin your journey"}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {mode === "signin" ? "Step back into your stories" : "Your private world awaits"}
+      <div className="relative z-10 w-full max-w-md p-12 bg-card/60 backdrop-blur-xl border border-border animate-fade-up shadow-luxe">
+        <div className="mb-10">
+          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— Tender Editorial —</p>
+          <h1 className="font-display text-4xl leading-tight">
+            {mode === "signin" ? "Re-enter the archive." : "Open the volume."}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-3 font-light">
+            {mode === "signin" ? "Your compositions remain where you left them." : "A private editorial. Yours alone."}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 rounded-xl" />
+            <Label htmlFor="email" className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Email</Label>
+            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              className="mt-2 rounded-none h-12 bg-transparent border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary px-0 font-serif text-base" />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 rounded-xl" />
+            <Label htmlFor="password" className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Password</Label>
+            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+              className="mt-2 rounded-none h-12 bg-transparent border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary px-0 font-serif text-base" />
           </div>
-          <Button type="submit" disabled={loading} className="w-full rounded-full bg-gradient-rose text-primary-foreground hover:opacity-90 h-11 font-serif text-base">
-            {loading ? "..." : mode === "signin" ? "Sign in" : "Create account"}
-          </Button>
+
+          <div className="pt-4">
+            <HeartButton type="submit" disabled={loading} className="w-full">
+              {loading ? "..." : mode === "signin" ? "Enter" : "Begin"}
+            </HeartButton>
+          </div>
         </form>
 
-        <div className="flex items-center gap-3 my-5">
+        <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted-foreground uppercase tracking-widest">or</span>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-[0.4em]">or</span>
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <Button variant="outline" onClick={handleGoogle} className="w-full rounded-full h-11">
+        <Button variant="outline" onClick={handleGoogle}
+          className="w-full rounded-none h-12 border-border hover:border-primary hover:text-primary hover:bg-transparent text-[11px] uppercase tracking-[0.3em]">
           Continue with Google
         </Button>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
-          <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="text-primary underline-offset-4 hover:underline">
-            {mode === "signin" ? "Create an account" : "Sign in"}
+        <p className="text-center text-[11px] uppercase tracking-[0.25em] text-muted-foreground mt-8">
+          {mode === "signin" ? "New here?" : "Already inside?"}{" "}
+          <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="text-primary hover:underline underline-offset-4 ml-1">
+            {mode === "signin" ? "Begin a volume" : "Re-enter"}
           </button>
         </p>
       </div>

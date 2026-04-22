@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { HeartButton } from "@/components/HeartButton";
-import { Loader2, BookHeart } from "lucide-react";
+import { Loader2, BookOpen } from "lucide-react";
 
 const TEMPLATE_LABELS: Record<string, string> = {
   "toxic-love": "Toxic Love", "enemies-to-lovers": "Enemies to Lovers",
@@ -28,36 +28,50 @@ const Profile = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-noir relative grain">
       <Header />
-      <div className="bokeh absolute inset-0 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[40vh] bg-gradient-ember opacity-25 pointer-events-none" />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-32 pb-20">
-        <div className="text-center mb-12 animate-fade-up">
-          <p className="text-xs uppercase tracking-[0.3em] text-primary/70">Your private library</p>
-          <h1 className="font-serif text-5xl mt-3">My stories</h1>
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-36 pb-20">
+        <div className="mb-16 animate-fade-up flex items-end justify-between border-b border-border pb-8">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— The Archive —</p>
+            <h1 className="font-display text-6xl md:text-7xl">Your Compositions</h1>
+          </div>
+          <span className="hidden md:block text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+            {stories.length} {stories.length === 1 ? "Entry" : "Entries"}
+          </span>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          <div className="flex justify-center py-32"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
         ) : stories.length === 0 ? (
-          <div className="text-center py-20 animate-fade-up">
-            <BookHeart className="w-12 h-12 text-primary/40 mx-auto mb-4" />
-            <p className="text-muted-foreground mb-8">Your library is waiting for its first story.</p>
-            <HeartButton glow onClick={() => navigate("/create")}>Start your story</HeartButton>
+          <div className="text-center py-32 animate-fade-up">
+            <BookOpen className="w-10 h-10 text-primary/40 mx-auto mb-6" />
+            <p className="text-muted-foreground mb-10 font-light tracking-wide">The archive waits in silence.</p>
+            <HeartButton glow onClick={() => navigate("/create")}>Compose the first</HeartButton>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
             {stories.map((s, i) => (
               <button key={s.id} onClick={() => navigate(`/story/${s.id}`)}
-                className="text-left p-7 rounded-3xl bg-card/80 backdrop-blur-sm border border-border/50 shadow-card hover:shadow-soft transition-spring hover:-translate-y-1 animate-fade-up"
-                style={{ animationDelay: `${i * 0.05}s` }}>
-                <span className="inline-block text-xs px-3 py-1 rounded-full bg-secondary text-secondary-foreground mb-4">
-                  {TEMPLATE_LABELS[s.template] ?? s.template}
-                </span>
-                <h3 className="font-serif text-2xl mb-2 leading-tight">{s.title}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{s.content.slice(0, 140)}…</p>
-                <p className="text-xs text-muted-foreground/80">
+                className="group text-left p-8 bg-background hover:bg-card transition-soft animate-fade-up min-h-[280px] flex flex-col"
+                style={{ animationDelay: `${i * 0.04}s` }}>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-primary">
+                    {TEMPLATE_LABELS[s.template] ?? s.template}
+                  </span>
+                  <span className="font-display text-xs text-muted-foreground">
+                    № {String(stories.length - i).padStart(3, "0")}
+                  </span>
+                </div>
+                <h3 className="font-display text-3xl mb-4 leading-tight group-hover:text-primary transition-soft">
+                  {s.title}
+                </h3>
+                <p className="text-sm text-muted-foreground line-clamp-3 mb-6 font-light leading-relaxed flex-1">
+                  {s.content.slice(0, 180)}…
+                </p>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/60 pt-4 border-t border-border/50">
                   {new Date(s.created_at).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}
                 </p>
               </button>
