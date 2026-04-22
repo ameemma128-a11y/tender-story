@@ -278,20 +278,37 @@ const Create = () => {
       <div className="absolute inset-x-0 top-0 h-[60vh] candle-bloom pointer-events-none animate-flicker" />
 
       <main className="relative z-10 max-w-3xl mx-auto px-4 md:px-6 pt-28 pb-32 md:pb-24">
-        {/* Progress */}
-        <div className="flex items-center justify-between mb-12 gap-1 overflow-x-auto pb-2">
-          {stepLabels.map((label, i) => {
-            const n = i + 1;
-            return (
-              <div key={n} className="flex-1 flex flex-col items-start gap-1.5 min-w-0">
-                <div className={cn("h-px w-full transition-soft", n <= step ? "bg-primary" : "bg-border")} />
-                <div className="flex items-center gap-1 min-w-0">
-                  <span className={cn("font-display text-[10px]", n <= step ? "text-primary" : "text-muted-foreground")}>0{n}</span>
-                  <span className={cn("text-[8px] uppercase tracking-[0.15em] truncate font-sans-ui hidden sm:block", n === step ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+        {/* Progress — simple on mobile, full bar on desktop */}
+        <div className="mb-12">
+          {/* Mobile: simple step counter */}
+          <div className="flex sm:hidden items-center justify-between mb-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-primary font-sans-ui">
+              Step {step} / {TOTAL_STEPS}
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-foreground font-sans-ui">
+              {stepLabels[step - 1]}
+            </span>
+          </div>
+          <div className="flex h-px w-full sm:hidden">
+            <div className="bg-primary transition-soft" style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
+            <div className="bg-border flex-1" />
+          </div>
+
+          {/* Desktop: full step bar */}
+          <div className="hidden sm:flex items-center justify-between gap-1">
+            {stepLabels.map((label, i) => {
+              const n = i + 1;
+              return (
+                <div key={n} className="flex-1 flex flex-col items-start gap-1.5 min-w-0">
+                  <div className={cn("h-px w-full transition-soft", n <= step ? "bg-primary" : "bg-border")} />
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className={cn("font-display text-[10px]", n <= step ? "text-primary" : "text-muted-foreground")}>0{n}</span>
+                    <span className={cn("text-[8px] uppercase tracking-[0.15em] truncate font-sans-ui", n === step ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <div key={step} className="animate-fade-up">
@@ -308,9 +325,18 @@ const Create = () => {
               </div>
               <Tabs defaultValue="romance" className="w-full">
                 <TabsList className="rounded-none bg-transparent border border-border p-0 h-auto w-full grid grid-cols-3">
-                  <TabsTrigger value="romance" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] md:text-[10px] uppercase tracking-[0.15em] py-3 font-sans-ui">Romance</TabsTrigger>
-                  <TabsTrigger value="universe" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] md:text-[10px] uppercase tracking-[0.15em] py-3 font-sans-ui">Universe</TabsTrigger>
-                  <TabsTrigger value="action" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] md:text-[10px] uppercase tracking-[0.15em] py-3 font-sans-ui">Action</TabsTrigger>
+                  <TabsTrigger value="romance" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] uppercase tracking-[0.1em] py-3 font-sans-ui">
+                    <span className="sm:hidden">Romance</span>
+                    <span className="hidden sm:inline">Romance</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="universe" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] uppercase tracking-[0.1em] py-3 font-sans-ui">
+                    <span className="sm:hidden">Universe</span>
+                    <span className="hidden sm:inline">Universe & Fantasy</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="action" className="rounded-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none text-[9px] uppercase tracking-[0.1em] py-3 font-sans-ui">
+                    <span className="sm:hidden">Action</span>
+                    <span className="hidden sm:inline">Action & Thriller</span>
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="romance" className="mt-6"><div className="flex flex-wrap gap-2">{ROMANCE_GENRES.map(g => <Tag key={g} active={genres.includes(g)} onClick={() => toggle(genres, setGenres, g)} onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}>{g}</Tag>)}</div></TabsContent>
                 <TabsContent value="universe" className="mt-6"><div className="flex flex-wrap gap-2">{UNIVERSE_GENRES.map(g => <Tag key={g} active={genres.includes(g)} onClick={() => toggle(genres, setGenres, g)} onDoubleClick={() => selectAndAdvance(genres, setGenres, g)}>{g}</Tag>)}</div></TabsContent>
