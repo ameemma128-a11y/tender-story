@@ -44,7 +44,7 @@ const Story = () => {
       <div className="absolute top-0 left-0 right-0 h-[60vh] bg-gradient-ember opacity-40 pointer-events-none" />
 
       <article className="relative max-w-2xl mx-auto px-6 pt-40 pb-20 animate-fade-up">
-        <p className="text-[10px] uppercase tracking-[0.5em] text-primary text-center">— A Tender Composition —</p>
+        <p className="text-[10px] uppercase tracking-[0.5em] text-primary text-center">— Your Story —</p>
         <h1 className="font-display text-5xl md:text-7xl text-center mt-8 mb-4 leading-[0.95] text-balance">
           {story.title}
         </h1>

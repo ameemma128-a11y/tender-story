@@ -61,12 +61,12 @@ const Auth = () => {
 
       <div className="relative z-10 w-full max-w-md p-12 bg-card/60 backdrop-blur-xl border border-border animate-fade-up shadow-luxe">
         <div className="mb-10">
-          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— Tender Editorial —</p>
+          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— Tender —</p>
           <h1 className="font-display text-4xl leading-tight">
-            {mode === "signin" ? "Re-enter the archive." : "Open the volume."}
+            {mode === "signin" ? "Welcome back." : "Let's get started."}
           </h1>
           <p className="text-sm text-muted-foreground mt-3 font-light">
-            {mode === "signin" ? "Your compositions remain where you left them." : "A private editorial. Yours alone."}
+            {mode === "signin" ? "Your stories are waiting where you left them." : "Your creative space, ready when you are."}
           </p>
         </div>
 

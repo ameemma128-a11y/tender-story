@@ -35,8 +35,8 @@ const Profile = () => {
       <main className="relative z-10 max-w-6xl mx-auto px-6 pt-36 pb-20">
         <div className="mb-16 animate-fade-up flex items-end justify-between border-b border-border pb-8">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— The Archive —</p>
-            <h1 className="font-display text-6xl md:text-7xl">Your Compositions</h1>
+            <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-3">— Your Library —</p>
+            <h1 className="font-display text-6xl md:text-7xl">Your Stories</h1>
           </div>
           <span className="hidden md:block text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
             {stories.length} {stories.length === 1 ? "Entry" : "Entries"}
@@ -48,8 +48,8 @@ const Profile = () => {
         ) : stories.length === 0 ? (
           <div className="text-center py-32 animate-fade-up">
             <BookOpen className="w-10 h-10 text-primary/40 mx-auto mb-6" />
-            <p className="text-muted-foreground mb-10 font-light tracking-wide">The archive waits in silence.</p>
-            <HeartButton glow onClick={() => navigate("/create")}>Compose the first</HeartButton>
+            <p className="text-muted-foreground mb-10 font-light tracking-wide">Your library is waiting for its first story.</p>
+            <HeartButton glow onClick={() => navigate("/create")}>Write your first story</HeartButton>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
