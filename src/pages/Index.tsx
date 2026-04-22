@@ -5,9 +5,9 @@ import { HeartButton } from "@/components/HeartButton";
 import { HeroSphere } from "@/components/HeroSphere";
 
 const chapters = [
-  { num: "01", title: "Choose the universe", desc: "Forbidden bonds. Royal courts. Fractured academies. The world bends to your fiction." },
-  { num: "02", title: "Cast the obsession", desc: "Anyone — real, imagined, half-remembered. The figure at the center of your dark." },
-  { num: "03", title: "Live the chapter", desc: "An immersive scene, written for you in seconds. Read it once. Keep it forever." },
+  { num: "01", title: "Pick a world", desc: "Choose a genre that sparks you — from royal romance to fantasy academies. The mood is yours to set." },
+  { num: "02", title: "Bring your characters", desc: "Real, fictional, or somewhere in between. Build the cast you want to read about." },
+  { num: "03", title: "Read your story", desc: "An immersive scene, written for you in seconds. Save it, share it, keep it forever." },
 ];
 
 const Index = () => {
@@ -27,7 +27,6 @@ const Index = () => {
 
       {/* HERO */}
       <section ref={heroRef} className="relative h-screen w-full overflow-hidden bg-gradient-noir">
-        {/* 3D Sphere — fills hero */}
         <div
           className="absolute inset-0"
           style={{
@@ -38,50 +37,46 @@ const Index = () => {
           <HeroSphere />
         </div>
 
-        {/* Crimson glow vignette */}
-        <div className="absolute inset-0 bg-gradient-ember pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-aurora pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none" />
 
-        {/* Editorial side label */}
         <div
           className="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 vertical-text text-[10px] uppercase tracking-[0.5em] text-muted-foreground z-10"
           style={{ transform: `translateY(calc(-50% + ${scrollY * -0.15}px))` }}
         >
-          A Dark Romance Editorial — MMXXVI
+          A Creative Platform for Storytellers — MMXXVI
         </div>
         <div
           className="hidden md:block absolute right-8 top-1/2 -translate-y-1/2 vertical-text text-[10px] uppercase tracking-[0.5em] text-muted-foreground z-10"
           style={{ transform: `translateY(calc(-50% + ${scrollY * -0.1}px)) rotate(180deg)` }}
         >
-          Issue No. 001 — Crimson
+          Issue No. 001 — Imagine
         </div>
 
-        {/* Hero copy */}
         <div
           className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center"
           style={{ transform: `translateY(${scrollY * -0.25}px)`, opacity: Math.max(0, 1 - scrollY / 500) }}
         >
-          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.6em] text-primary/80 animate-fade-in">
-            — An Editorial of the Imagined —
+          <p className="text-[10px] md:text-[11px] uppercase tracking-[0.6em] text-primary/90 animate-fade-in">
+            — A Platform for Storytellers —
           </p>
           <h1 className="font-display text-[22vw] md:text-[14vw] leading-[0.85] mt-6 text-foreground animate-fade-up">
             TENDER
           </h1>
           <p className="font-serif italic text-xl md:text-3xl text-primary mt-8 animate-fade-up delay-100 max-w-2xl text-balance">
-            Your imagination, written in crimson.
+            Your story, your way.
           </p>
           <p className="max-w-md mx-auto mt-6 text-muted-foreground text-sm md:text-base font-light tracking-wide animate-fade-up delay-200">
-            Compose immersive fiction with the figures that haunt you. In seconds.
+            Every imagination deserves to be written. Bring your characters to life — in seconds.
           </p>
 
           <div className="mt-14 animate-fade-up delay-300">
             <HeartButton glow onClick={() => navigate("/create")}>
-              Begin Chapter One
+              Start writing
             </HeartButton>
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-fade-in delay-700">
           <span className="text-[9px] uppercase tracking-[0.4em] text-muted-foreground">Scroll</span>
           <div className="w-px h-12 bg-gradient-to-b from-primary to-transparent" />
@@ -93,7 +88,7 @@ const Index = () => {
         <div className="flex animate-marquee whitespace-nowrap">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex items-center gap-12 px-6 font-display text-3xl md:text-5xl text-foreground/30">
-              {["FORBIDDEN", "OBSESSION", "RUIN", "DEVOTION", "VOWS", "VENGEANCE", "DESIRE", "SHADOW"].map((w) => (
+              {["IMAGINE", "CREATE", "WRITE", "EXPLORE", "DREAM", "BUILD", "STORY", "WORLDS"].map((w) => (
                 <span key={w + i} className="flex items-center gap-12">
                   <span>{w}</span>
                   <span className="text-primary text-xl">✦</span>
@@ -107,15 +102,15 @@ const Index = () => {
       {/* CHAPTERS */}
       <section className="relative py-32 md:py-48 px-6 max-w-6xl mx-auto">
         <div className="text-center mb-24">
-          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— The Method —</p>
+          <p className="text-[10px] uppercase tracking-[0.5em] text-primary mb-4">— How it works —</p>
           <h2 className="font-display text-5xl md:text-7xl text-balance">
-            Three movements.<br/>
-            <span className="italic font-normal text-muted-foreground">One private fiction.</span>
+            Three simple steps.<br/>
+            <span className="italic font-normal text-muted-foreground">One story made for you.</span>
           </h2>
         </div>
 
         <div className="space-y-px">
-          {chapters.map((c, i) => (
+          {chapters.map((c) => (
             <div
               key={c.num}
               className="group grid md:grid-cols-12 gap-6 md:gap-12 py-12 md:py-16 border-t border-border hover:border-primary transition-soft"
@@ -139,25 +134,25 @@ const Index = () => {
 
       {/* CLOSING CTA */}
       <section className="relative py-32 md:py-48 px-6 text-center bg-gradient-noir border-t border-border">
-        <div className="absolute inset-0 bg-gradient-ember opacity-50" />
+        <div className="absolute inset-0 bg-gradient-aurora opacity-50" />
         <div className="relative max-w-3xl mx-auto">
           <h2 className="font-display text-5xl md:text-7xl text-balance leading-[0.95]">
-            Your darkest chapter <span className="italic text-primary">awaits</span>.
+            Your next story is <span className="italic text-primary">waiting</span>.
           </h2>
           <p className="text-muted-foreground mt-8 max-w-lg mx-auto font-light">
-            Step inside. Write what you cannot say aloud.
+            Bring your imagination to the page. It only takes a few seconds.
           </p>
           <div className="mt-12">
             <HeartButton glow onClick={() => navigate("/create")}>
-              Enter Tender
+              Create your story
             </HeartButton>
           </div>
         </div>
       </section>
 
       <footer className="border-t border-border py-10 px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
-        <span>© MMXXVI — Tender Editorial</span>
-        <span>Crimson Issue · Vol. I</span>
+        <span>© MMXXVI — Tender</span>
+        <span>A Creative Platform · Vol. I</span>
       </footer>
     </div>
   );
