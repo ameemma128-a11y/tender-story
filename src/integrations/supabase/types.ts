@@ -17,11 +17,15 @@ export type Database = {
       stories: {
         Row: {
           character_name: string
+          character_notes: string | null
+          character_traits: string[] | null
           content: string
+          cover_url: string | null
           created_at: string
           id: string
           length: string
           reader_name: string | null
+          reader_notes: string | null
           reader_traits: string[] | null
           template: string
           title: string
@@ -30,11 +34,15 @@ export type Database = {
         }
         Insert: {
           character_name: string
+          character_notes?: string | null
+          character_traits?: string[] | null
           content: string
+          cover_url?: string | null
           created_at?: string
           id?: string
           length: string
           reader_name?: string | null
+          reader_notes?: string | null
           reader_traits?: string[] | null
           template: string
           title: string
@@ -43,11 +51,15 @@ export type Database = {
         }
         Update: {
           character_name?: string
+          character_notes?: string | null
+          character_traits?: string[] | null
           content?: string
+          cover_url?: string | null
           created_at?: string
           id?: string
           length?: string
           reader_name?: string | null
+          reader_notes?: string | null
           reader_traits?: string[] | null
           template?: string
           title?: string

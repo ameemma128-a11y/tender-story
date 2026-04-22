@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
@@ -21,7 +22,21 @@ const TEMPLATES = [
   { id: "arranged-marriage", label: "Arranged Marriage" },
   { id: "forbidden-bond", label: "Forbidden Bond" },
 ];
-const TRAITS = ["Soft & shy", "Bold & fierce", "Sarcastic", "Mysterious", "Warm & caring", "Cold & distant"];
+
+const CHARACTER_TRAITS = [
+  "Cold & distant", "Warm & protective", "Arrogant & confident", "Gentle & patient",
+  "Mysterious & unpredictable", "Playful & teasing", "Possessive & intense",
+  "Soft & caring", "Dominant & commanding", "Broken & guarded",
+];
+
+const READER_TRAITS = [
+  "Soft & shy", "Bold & fierce", "Sarcastic & witty", "Mysterious & quiet",
+  "Warm & empathetic", "Clumsy & endearing", "Confident & ambitious",
+  "Dreamy & romantic", "Independent & strong", "Playful & flirty",
+  "Serious & focused", "Sweet & gentle", "Cold on the outside warm inside",
+  "Chaotic & unpredictable",
+];
+
 const TONES = ["Sweet romance", "Intense & dramatic", "Suggestive", "Angst & emotional", "Dark & complex"];
 const LENGTHS = [
   { id: "short", label: "Short scene", desc: "500 words" },
@@ -34,7 +49,7 @@ const Tag = ({ active, onClick, children }: any) => (
     type="button"
     onClick={onClick}
     className={cn(
-      "px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] transition-soft border",
+      "px-4 py-2 text-[11px] uppercase tracking-[0.2em] transition-soft border",
       active
         ? "bg-primary text-primary-foreground border-primary shadow-ember"
         : "bg-transparent text-foreground/80 border-border hover:border-primary hover:text-primary"
@@ -49,9 +64,12 @@ const Create = () => {
   const [step, setStep] = useState(1);
   const [template, setTemplate] = useState("");
   const [characterName, setCharacterName] = useState("");
+  const [characterTraits, setCharacterTraits] = useState<string[]>([]);
+  const [characterNotes, setCharacterNotes] = useState("");
   const [includeReader, setIncludeReader] = useState(false);
   const [readerName, setReaderName] = useState("");
   const [readerTraits, setReaderTraits] = useState<string[]>([]);
+  const [readerNotes, setReaderNotes] = useState("");
   const [tones, setTones] = useState<string[]>([]);
   const [length, setLength] = useState("chapter");
   const [generating, setGenerating] = useState(false);
@@ -85,8 +103,10 @@ const Create = () => {
         },
         body: JSON.stringify({
           template, characterName,
+          characterTraits, characterNotes: characterNotes.trim() || null,
           readerName: includeReader ? readerName : null,
           readerTraits: includeReader ? readerTraits : [],
+          readerNotes: includeReader ? (readerNotes.trim() || null) : null,
           tones, length,
         }),
       });
@@ -128,8 +148,11 @@ const Create = () => {
       const { data: saved, error } = await supabase.from("stories").insert({
         user_id: sess.session.user.id,
         title, template, character_name: characterName,
+        character_traits: characterTraits,
+        character_notes: characterNotes.trim() || null,
         reader_name: includeReader ? readerName : null,
         reader_traits: includeReader ? readerTraits : [],
+        reader_notes: includeReader ? (readerNotes.trim() || null) : null,
         tones, length, content: body,
       }).select().single();
       if (error) throw error;
@@ -148,7 +171,6 @@ const Create = () => {
       <div className="absolute inset-0 bg-gradient-ember opacity-30 pointer-events-none" />
 
       <main className="relative z-10 max-w-3xl mx-auto px-6 pt-32 pb-20">
-        {/* Step indicator */}
         <div className="flex items-center justify-between mb-16">
           {stepLabels.map((label, i) => {
             const n = i + 1;
@@ -205,6 +227,33 @@ const Create = () => {
                 className="rounded-none h-16 text-2xl font-serif px-0 bg-transparent border-0 border-b-2 border-border focus-visible:ring-0 focus-visible:border-primary"
               />
               <p className="text-xs text-muted-foreground mt-4 italic font-light">Real, fictional, half-remembered. No one will know.</p>
+
+              {characterName.trim() && (
+                <div className="mt-10 animate-fade-up space-y-6">
+                  <div>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                      Their personality <span className="opacity-60 normal-case tracking-normal">— pick any</span>
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {CHARACTER_TRAITS.map(t => (
+                        <Tag key={t} active={characterTraits.includes(t)} onClick={() => toggle(characterTraits, setCharacterTraits, t)}>{t}</Tag>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                      Anything else about them? <span className="opacity-60 normal-case tracking-normal">(optional)</span>
+                    </Label>
+                    <Textarea
+                      value={characterNotes}
+                      onChange={e => setCharacterNotes(e.target.value)}
+                      placeholder="A scar above their brow, a habit of humming when nervous…"
+                      rows={3}
+                      className="rounded-none bg-transparent border border-border focus-visible:ring-0 focus-visible:border-primary font-serif text-base resize-none"
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
 
@@ -225,12 +274,26 @@ const Create = () => {
                       className="rounded-none h-12 mt-2 bg-transparent border-0 border-b border-border focus-visible:ring-0 focus-visible:border-primary text-lg font-serif px-0" />
                   </div>
                   <div>
-                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Your nature</Label>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                      Your nature <span className="opacity-60 normal-case tracking-normal">— pick any</span>
+                    </Label>
                     <div className="flex flex-wrap gap-2">
-                      {TRAITS.map(t => (
+                      {READER_TRAITS.map(t => (
                         <Tag key={t} active={readerTraits.includes(t)} onClick={() => toggle(readerTraits, setReaderTraits, t)}>{t}</Tag>
                       ))}
                     </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 block">
+                      Describe yourself in your own words <span className="opacity-60 normal-case tracking-normal">(optional)</span>
+                    </Label>
+                    <Textarea
+                      value={readerNotes}
+                      onChange={e => setReaderNotes(e.target.value)}
+                      placeholder="The little things that make you, you…"
+                      rows={3}
+                      className="rounded-none bg-transparent border border-border focus-visible:ring-0 focus-visible:border-primary font-serif text-base resize-none"
+                    />
                   </div>
                 </div>
               )}

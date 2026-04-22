@@ -28,12 +28,19 @@ const Auth = () => {
           email, password,
           options: { emailRedirectTo: `${window.location.origin}/create` },
         });
-        if (error) throw error;
+        if (error) {
+          if ((error as any).code === "weak_password" || /weak|pwned/i.test(error.message)) {
+            throw new Error("This password has appeared in a data breach. Please choose a stronger one.");
+          }
+          if (/already/i.test(error.message)) {
+            throw new Error("An account with this email already exists. Try signing in instead.");
+          }
+          throw error;
+        }
         if (data.session) {
           toast.success("Welcome to Tender");
           navigate("/create");
         } else {
-          // Fallback: try immediate sign-in (auto-confirm enabled)
           const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
           if (signInErr) {
             toast.success("Account created. You can sign in now.");
@@ -44,7 +51,12 @@ const Auth = () => {
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (/invalid/i.test(error.message)) {
+            throw new Error("Wrong email or password.");
+          }
+          throw error;
+        }
         navigate("/create");
       }
     } catch (err: any) {

@@ -34,8 +34,11 @@ export const Header = () => {
       <nav className="flex items-center gap-6 text-[11px] uppercase tracking-[0.3em]">
         {userId ? (
           <>
-            <button onClick={() => navigate("/profile")} className="text-foreground/80 hover:text-primary transition-soft">
-              Archive
+            <button onClick={() => navigate("/library")} className="text-foreground/80 hover:text-primary transition-soft">
+              Library
+            </button>
+            <button onClick={() => navigate("/create")} className="text-foreground/80 hover:text-primary transition-soft hidden sm:inline">
+              Write
             </button>
             <button
               onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}

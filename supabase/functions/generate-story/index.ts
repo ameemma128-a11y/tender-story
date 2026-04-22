@@ -21,15 +21,25 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { template, characterName, readerName, readerTraits, tones, length } = await req.json();
+    const {
+      template, characterName, characterTraits, characterNotes,
+      readerName, readerTraits, readerNotes, tones, length,
+    } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const wordTarget = length === "short" ? 500 : length === "chapter" ? 1500 : 3000;
     const vibe = TEMPLATE_PROMPTS[template] ?? "an immersive romantic story";
+
+    const charBlock = `Love interest: "${characterName}"${
+      characterTraits?.length ? `. Personality: ${characterTraits.join(", ")}` : ""
+    }${characterNotes ? `. Extra: ${characterNotes}` : ""}.`;
+
     const reader = readerName
-      ? `The reader inserts themselves as "${readerName}"${readerTraits?.length ? `, with personality: ${readerTraits.join(", ")}` : ""}. Write in second person ("you").`
+      ? `The reader inserts themselves as "${readerName}"${
+          readerTraits?.length ? `, with personality: ${readerTraits.join(", ")}` : ""
+        }${readerNotes ? `. Self-description: ${readerNotes}` : ""}. Write in second person ("you").`
       : `Write in second person ("you"), the reader as the protagonist.`;
 
     const system = `You are Tender, a gifted storyteller crafting deeply immersive, emotionally rich personalized stories.
@@ -37,8 +47,9 @@ Style: cinematic, sensorial, present tense, evocative imagery, intimate inner th
 Always respect the user's chosen tone. Avoid cringe; aim for elegant, literary prose.
 Begin with a captivating hook. End with a resonant beat.`;
 
-    const user = `Write an immersive story (~${wordTarget} words) featuring "${characterName}" as the love interest.
+    const user = `Write an immersive story (~${wordTarget} words).
 Trope: ${vibe}.
+${charBlock}
 Tone: ${tones?.join(", ") || "sweet romance"}.
 ${reader}
 Start with a short evocative title on the first line formatted as: # Title
@@ -48,7 +59,7 @@ Then a blank line, then the story.`;
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-5-mini",
+        model: "google/gemini-2.5-flash",
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
         stream: true,
       }),
@@ -56,18 +67,18 @@ Then a blank line, then the story.`;
 
     if (!resp.ok) {
       if (resp.status === 429) {
-        return new Response(JSON.stringify({ error: "Trop de requêtes, réessaie dans un instant." }), {
+        return new Response(JSON.stringify({ error: "Too many requests, try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (resp.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Ajoute des crédits dans Lovable." }), {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Add credits in Lovable." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await resp.text();
       console.error("AI error", resp.status, t);
-      return new Response(JSON.stringify({ error: "Erreur génération" }), {
+      return new Response(JSON.stringify({ error: "Generation error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
