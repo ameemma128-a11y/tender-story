@@ -567,32 +567,163 @@ const Create = () => {
 
   const handleGenerate = async () => {
     setGenerating(true);
+
     try {
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) { navigate("/auth"); return; }
-      const protagonistDescription = includeReader ? readerName : protagonistCustom.trim()||protagonistChoice;
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-story`, {
-        method:"POST",
-        headers:{"Content-Type":"application/json",Authorization:`Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`},
-        body:JSON.stringify({ genres, storyIdea:storyIdea.trim()||null, contexts, contextNotes:contextNotes.trim()||null, characters:characters.filter(c=>c.name.trim()), includeReader, readerName:includeReader?readerName:null, readerPronouns:includeReader?readerPronouns:null, readerTraits:includeReader?readerTraits:[], readerNotes:includeReader?(readerNotes.trim()||null):null, protagonistDescription:!includeReader?protagonistDescription:null, storyStart, tones, toneNotes:toneNotes.trim()||null, ending, endingCustom:endingCustom.trim()||null, length, language }),
-      });
-      if (!resp.ok||!resp.body) { const err=await resp.json().catch(()=>({})); throw new Error((err as any).error||"Generation failed"); }
-      const reader=resp.body.getReader(); const decoder=new TextDecoder(); let buffer=""; let content="";
-      while (true) {
-        const {done,value}=await reader.read(); if (done) break;
-        buffer+=decoder.decode(value,{stream:true}); let idx;
-        while ((idx=buffer.indexOf("\n"))!==-1) { let line=buffer.slice(0,idx); buffer=buffer.slice(idx+1); if (line.endsWith("\r")) line=line.slice(0,-1); if (!line.startsWith("data: ")) continue; const json=line.slice(6).trim(); if (json==="[DONE]") continue; try { const p=JSON.parse(json); const c=p.choices?.[0]?.delta?.content; if (c) content+=c; } catch { buffer=line+"\n"+buffer; break; } }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        navigate("/auth");
+        return;
       }
-      const match=content.match(/^#\s+(.+)/);
-      const mainCharName=characters[0]?.name??"Unknown";
-      const title=match?match[1].trim():`${genres[0]??"Untitled"} with ${mainCharName}`;
-      const body=content.replace(/^#\s+.+\n+/,"");
-      const templateSlug=(genres[0]??"custom").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
-      const combinedNotes=[contextNotes.trim(),contexts.length?`Universe: ${contexts.join(", ")}`:"",genres.length?`Genres: ${genres.join(", ")}`:"",storyIdea.trim()?`Idea: ${storyIdea.trim()}`:"",storyStart?`Opening: ${storyStart}`:"",toneNotes.trim()?`Mood: ${toneNotes.trim()}`:"",ending?`Ending: ${ending}`:"",endingCustom.trim()?`Custom ending: ${endingCustom.trim()}`:"",`Language: ${language}`].filter(Boolean).join(" | ")||null;
-      const {data:saved,error}=await supabase.from("stories").insert({user_id:sess.session.user.id,title,template:templateSlug,character_name:mainCharName,character_traits:characters[0]?.traits??[],character_notes:combinedNotes,reader_name:includeReader?readerName:null,reader_traits:includeReader?readerTraits:[],reader_notes:includeReader?(readerNotes.trim()||null):null,tones,length,content:body}).select().single();
+
+      const protagonistDescription = includeReader ? readerName : protagonistCustom.trim() || protagonistChoice;
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-story`;
+
+      const resp = await fetch(functionUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          genres,
+          storyIdea: storyIdea.trim() || null,
+          contexts,
+          contextNotes: contextNotes.trim() || null,
+          characters: characters.filter((c) => c.name.trim()),
+          includeReader,
+          readerName: includeReader ? readerName : null,
+          readerPronouns: includeReader ? readerPronouns : null,
+          readerTraits: includeReader ? readerTraits : [],
+          readerNotes: includeReader ? readerNotes.trim() || null : null,
+          protagonistDescription: !includeReader ? protagonistDescription : null,
+          storyStart,
+          tones,
+          toneNotes: toneNotes.trim() || null,
+          ending,
+          endingCustom: endingCustom.trim() || null,
+          length,
+          language,
+        }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error((err as any).error || "Generation failed");
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let content = "";
+      let streamDone = false;
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":")) continue;
+          if (line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (delta) content += delta;
+          } catch {
+            buffer = `${line}\n${buffer}`;
+            break;
+          }
+        }
+      }
+
+      if (buffer.trim()) {
+        for (let rawLine of buffer.split("\n")) {
+          if (rawLine.endsWith("\r")) rawLine = rawLine.slice(0, -1);
+          if (rawLine.startsWith(":")) continue;
+          if (rawLine.trim() === "") continue;
+          if (!rawLine.startsWith("data: ")) continue;
+
+          const jsonStr = rawLine.slice(6).trim();
+          if (jsonStr === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (delta) content += delta;
+          } catch {
+            continue;
+          }
+        }
+      }
+
+      const normalizedContent = content.trim();
+      if (!normalizedContent) {
+        throw new Error("Empty story returned by generator");
+      }
+
+      const match = normalizedContent.match(/^#\s+(.+)/m);
+      const mainCharName = characters[0]?.name ?? "Unknown";
+      const title = match ? match[1].trim() : `${genres[0] ?? "Untitled"} with ${mainCharName}`;
+      const body = normalizedContent.replace(/^#\s+.+(?:\r?\n)+/, "").trim();
+      const templateSlug = (genres[0] ?? "custom").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      const combinedNotes = [
+        contextNotes.trim(),
+        contexts.length ? `Universe: ${contexts.join(", ")}` : "",
+        genres.length ? `Genres: ${genres.join(", ")}` : "",
+        storyIdea.trim() ? `Idea: ${storyIdea.trim()}` : "",
+        storyStart ? `Opening: ${storyStart}` : "",
+        toneNotes.trim() ? `Mood: ${toneNotes.trim()}` : "",
+        ending ? `Ending: ${ending}` : "",
+        endingCustom.trim() ? `Custom ending: ${endingCustom.trim()}` : "",
+        `Language: ${language}`,
+      ]
+        .filter(Boolean)
+        .join(" | ") || null;
+
+      const { data: saved, error } = await supabase
+        .from("stories")
+        .insert({
+          user_id: session.user.id,
+          title,
+          template: templateSlug,
+          character_name: mainCharName,
+          character_traits: characters[0]?.traits ?? [],
+          character_notes: combinedNotes,
+          reader_name: includeReader ? readerName : null,
+          reader_traits: includeReader ? readerTraits : [],
+          reader_notes: includeReader ? readerNotes.trim() || null : null,
+          tones,
+          length,
+          content: body,
+        })
+        .select()
+        .single();
+
       if (error) throw error;
+
       navigate(`/story/${saved.id}`);
-    } catch (e: any) { toast.error(e.message??"Something went wrong"); setGenerating(false); }
+    } catch (e: any) {
+      toast.error(e.message ?? "Something went wrong");
+      setGenerating(false);
+    }
   };
 
   return (
