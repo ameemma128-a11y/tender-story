@@ -80,6 +80,21 @@ function getWordTarget(length: string): number {
   return 3000;
 }
 
+function buildCharacterMemory(characters: CharacterInput[]): string {
+  if (!characters.length) return "";
+  return characters
+    .map((c, i) => {
+      const lines = [
+        `${i + 1}. ${c.name}`,
+        c.traits?.length ? `   • Personality (locked): ${c.traits.join(", ")}` : "",
+        c.notes ? `   • Memory anchor: ${c.notes}` : "",
+        `   • Voice rule: dialogue, choices and reactions MUST stay consistent with the personality above for the entire story.`,
+      ].filter(Boolean);
+      return lines.join("\n");
+    })
+    .join("\n");
+}
+
 function buildPrompts(payload: GenerateStoryPayload) {
   const genres = sanitizeStringArray(payload.genres);
   const contexts = sanitizeStringArray(payload.contexts);
@@ -104,70 +119,143 @@ function buildPrompts(payload: GenerateStoryPayload) {
   const wordTarget = getWordTarget(length);
 
   const worldDetails = [
-    contexts.length ? `World or setting tags: ${contexts.join(", ")}` : "",
+    contexts.length ? `World tags: ${contexts.join(", ")}` : "",
     contextNotes ? `World notes: ${contextNotes}` : "",
   ].filter(Boolean);
 
-  const characterDetails = characters.length
-    ? characters
-        .map((character) => {
-          const details = [
-            `Name: ${character.name}`,
-            character.traits?.length ? `Traits: ${character.traits.join(", ")}` : "",
-            character.notes ? `Notes: ${character.notes}` : "",
-          ].filter(Boolean);
-          return `- ${details.join(" | ")}`;
-        })
-        .join("\n")
-    : "";
+  const characterMemory = buildCharacterMemory(characters);
 
-  const protagonistBlock = includeReader
+  // ── POV block ──────────────────────────────────────────────────────────────
+  const povBlock = includeReader
     ? [
-        `The protagonist is the reader named \"${readerName || "the reader"}\".`,
-        readerPronouns ? `Pronouns/reference preference: ${readerPronouns}.` : "",
-        readerTraits.length ? `Reader traits: ${readerTraits.join(", ")}.` : "",
-        readerNotes ? `Reader notes: ${readerNotes}.` : "",
-        "Write in first person only using I / me / my.",
-        "Never switch to second person narration.",
+        `POV MODE: FIRST_PERSON_READER`,
+        `The protagonist IS the reader. Their name is "${readerName || "the reader"}".`,
+        readerPronouns ? `Reader pronouns / form of address: ${readerPronouns}.` : "",
+        readerTraits.length ? `Reader inner traits (locked): ${readerTraits.join(", ")}.` : "",
+        readerNotes ? `Reader background memory: ${readerNotes}.` : "",
+        `HARD POV RULES (never break, not even in dialogue tags):`,
+        `- Narrate ONLY in first person: "I", "me", "my", "mine".`,
+        `- NEVER use second person ("you", "your") to describe the protagonist.`,
+        `- NEVER describe the protagonist from the outside as if they were another character.`,
+        `- Inner monologue is allowed and encouraged: thoughts, sensations, heartbeat, breath, micro-emotions.`,
+        `- Other characters address the protagonist by their name or pronouns above — never "the reader".`,
+        `- The narrator does NOT know things the protagonist cannot perceive in the moment.`,
       ]
         .filter(Boolean)
         .join("\n")
     : [
-        protagonistDescription ? `Primary protagonist: ${protagonistDescription}.` : "Create a compelling protagonist that fits the story.",
-        "Write in close third-person narration.",
+        `POV MODE: CLOSE_THIRD_PERSON`,
+        protagonistDescription
+          ? `Primary protagonist: ${protagonistDescription}.`
+          : `Create a compelling protagonist that fits the brief.`,
+        `HARD POV RULES:`,
+        `- Stay in close third person from the protagonist's perspective for the entire story.`,
+        `- Do NOT switch perspective mid-scene. Use scene breaks if perspective must shift.`,
+        `- No omniscient asides. Only what the POV character can perceive, feel, or reasonably infer.`,
       ]
         .filter(Boolean)
         .join("\n");
 
+  // ── Tone block ─────────────────────────────────────────────────────────────
+  const toneBlock = [
+    tones.length ? `Tone palette (locked): ${tones.join(", ")}.` : "",
+    toneNotes ? `Mood notes: ${toneNotes}.` : "",
+    `TONE RULES:`,
+    `- The emotional register stays inside this palette from first to last paragraph.`,
+    `- If multiple tones are listed, blend them — do not alternate randomly.`,
+    `- Sentence rhythm must reflect the tone (short/cutting for tension, longer/sensory for tender).`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  // ── Genre blending block ───────────────────────────────────────────────────
+  const genreBlock = genres.length
+    ? [
+        `Genres to blend: ${genres.join(" + ")}.`,
+        `GENRE RULES:`,
+        `- Treat the list as ONE coherent fusion, not a checklist.`,
+        `- Each scene must visibly carry traits of every listed genre — woven together, not stacked.`,
+        `- Respect the conventions of the dominant genre (first listed) while letting others color it.`,
+      ].join("\n")
+    : "";
+
   const openingInstruction = STORY_START_LABELS[storyStart] ?? "Begin with a strong, immediate hook.";
   const endingInstruction = endingCustom || ENDING_LABELS[ending] || "Deliver a coherent and emotionally resonant ending.";
 
+  // ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
   const systemPrompt = [
-    "You are an expert fiction writer generating polished immersive stories.",
-    "Return the answer as normal story text in Markdown.",
-    "The first line must be a single Markdown H1 title.",
-    "After the title, write only the story body.",
-    `Write only in ${language}.`,
-    "Keep names, world details, and character consistency strict.",
-    "Do not use placeholders, meta commentary, or explanations.",
-    "Avoid clichés, avoid generic summaries, and keep dialogue natural.",
+    `You are an award-winning fiction writer crafting deeply immersive prose.`,
+    ``,
+    `OUTPUT FORMAT (strict):`,
+    `- The very first line MUST be a single Markdown H1 title: "# Title".`,
+    `- After the title, output ONLY the story body in Markdown paragraphs.`,
+    `- No preface, no notes, no system text, no meta commentary, no explanations of choices.`,
+    ``,
+    `LANGUAGE:`,
+    `- Write the entire story strictly in ${language}, including the title, dialogue, inner thoughts and sensory details.`,
+    `- Do not slip into another language for stylistic effect unless the user idea explicitly asks for it.`,
+    ``,
+    `IMMERSION CORE:`,
+    `- Use the five senses in every scene (sight, sound, touch, smell, taste where relevant).`,
+    `- Anchor every emotion in a body signal (breath, pulse, throat, hands, posture).`,
+    `- Show, don't tell. Replace emotion labels with embodied behavior.`,
+    `- Keep paragraphs tight and rhythmic; vary sentence length intentionally.`,
+    ``,
+    `CHARACTER MEMORY (treat as canon, never contradict):`,
+    `- Names are locked. Spell each name exactly the same way every time.`,
+    `- Personality traits are locked. A "cold & distant" character does not suddenly become warm without an on-page reason.`,
+    `- Memory anchors (notes) MUST appear or be honored at least once in the story when relevant.`,
+    `- Track who knows what: a character cannot react to information they were never given on page.`,
+    ``,
+    `NARRATIVE CONTINUITY:`,
+    `- Maintain a consistent timeline. Time of day, weather, location and clothing remain stable until you explicitly change them.`,
+    `- Reuse and pay off small details introduced earlier (objects, gestures, sentences) — at least one callback before the ending.`,
+    `- Scene transitions must be deliberate: end the previous beat with an emotional or sensory hook, then re-anchor place + time + POV emotion in the first 2 lines of the new scene.`,
+    `- No retconning. If a fact was stated, it stays true.`,
+    ``,
+    `DIALOGUE REALISM:`,
+    `- Each character speaks with a distinct voice that reflects their locked traits.`,
+    `- Use contractions, interruptions, silences, subtext. Avoid speeches and exposition dumps.`,
+    `- Beats > tags: prefer action/sensation beats around lines instead of "he said angrily".`,
+    `- No on-the-nose emotion declarations. Imply, don't announce.`,
+    ``,
+    `ANTI-REPETITION:`,
+    `- Do not reuse the same descriptive phrase or metaphor twice.`,
+    `- Vary sensory entry points across paragraphs (don't start three paragraphs in a row with sight).`,
+    `- Avoid filler phrases ("suddenly", "somehow", "couldn't help but").`,
+    ``,
+    `BANNED:`,
+    `- Lists, bullet points, headings other than the H1 title, footnotes, author notes.`,
+    `- Breaking the POV rules under any circumstance.`,
+    `- Renaming, removing, or merging characters.`,
   ].join("\n");
 
+  // ── USER PROMPT (story brief) ─────────────────────────────────────────────
   const userPrompt = [
+    `STORY BRIEF`,
     `Target length: about ${wordTarget} words.`,
-    genres.length ? `Genres: ${genres.join(", ")}.` : "",
-    storyIdea ? `Story idea: ${storyIdea}.` : "",
-    worldDetails.length ? worldDetails.join("\n") : "",
-    protagonistBlock,
-    characterDetails ? `Supporting characters:\n${characterDetails}` : "",
-    tones.length ? `Tone: ${tones.join(", ")}.` : "",
-    toneNotes ? `Tone notes: ${toneNotes}.` : "",
-    `Opening direction: ${openingInstruction}`,
-    `Ending direction: ${endingInstruction}`,
-    "Make the story emotionally coherent from beginning to end.",
+    ``,
+    genreBlock,
+    storyIdea ? `\nUser idea: ${storyIdea}` : "",
+    worldDetails.length ? `\nWORLD\n${worldDetails.join("\n")}` : "",
+    `\nPOV & PROTAGONIST\n${povBlock}`,
+    characterMemory ? `\nCHARACTER MEMORY (canon)\n${characterMemory}` : "",
+    `\nTONE\n${toneBlock}`,
+    `\nSTRUCTURE`,
+    `- Opening: ${openingInstruction}`,
+    `- Middle: escalate stakes through specific, sensory beats; honor at least one character memory anchor.`,
+    `- Ending: ${endingInstruction}`,
+    ``,
+    `FINAL CHECK (do silently before writing):`,
+    `1. POV mode is respected from the first sentence to the last.`,
+    `2. Every named character behaves consistently with their locked traits.`,
+    `3. The tone palette is unbroken.`,
+    `4. The selected genres are blended in every major scene.`,
+    `5. The output is written entirely in ${language}.`,
+    `Then write the story.`,
   ]
     .filter(Boolean)
-    .join("\n\n");
+    .join("\n");
 
   return { systemPrompt, userPrompt };
 }
